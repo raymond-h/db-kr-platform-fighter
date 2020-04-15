@@ -45,7 +45,7 @@ int main(int argc, char const *argv[]) {
 		ggpo_advance_frame,
 		ggpo_on_event
 	};
-	GGPOErrorCode res = ggpo_start_session(&session, &cbs, "db kr platform fighter", 2, sizeof(int), 7001);
+	auto res = ggpo_start_session(&session, &cbs, "db kr platform fighter", 2, sizeof(int), 7001);
 	cout << "ggpo_start_session: " << res << endl;
 
 	res = ggpo_close_session(session);
