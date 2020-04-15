@@ -1,5 +1,6 @@
 #include <iostream>
-#include "ggponet.h"
+#include <ggponet.h>
+#include <entt/entt.hpp>
 
 using namespace std;
 
@@ -33,7 +34,9 @@ bool ggpo_on_event(GGPOEvent *info) {
 }
 
 int main(int argc, char const *argv[]) {
-	cout << "Hello world!" << endl;
+	entt::registry registry;
+
+	cout << "Hello world! " << &registry << endl;
 
 	GGPOSession* session;
 	GGPOSessionCallbacks cbs = {
