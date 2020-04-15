@@ -13,7 +13,7 @@ A handful of config variables need to be set (use cmake-gui to easily manage the
 
 - `ENTT_SRC_PATH`: Path to `src/` directory in EnTT's root directory (`entt/entt.hpp` should be accessible from that folder)
 - `GGPO_INCLUDE_PATH`: Path to directory containing `ggponet.h` in GGPO
-- `GGPO_LIB_PATH`: Path to directory containing `GGPO.lib` (as a result of compiling the project)
+- `GGPO_LIB_PATH`: Path to directory containing `GGPO.lib` (as a result of compiling GGPO)
 - `SDL2_DIR`: Path to root folder of SDL2 - setting this will fill out the other `SDL2_...` configs automatically
 
 ## Running
