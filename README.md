@@ -1,8 +1,8 @@
 ## Dependencies
-CMake 3.10+
-SDL2 (development files for Visual Studio)
-GGPO
-EnTT
+- CMake 3.10+
+- SDL2 (development files for Visual Studio)
+- GGPO
+- EnTT
 
 ## Setting up
 
