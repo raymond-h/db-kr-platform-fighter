@@ -29,3 +29,5 @@ Compile the project by whatever means you chose with cmake. Dependencies are dow
 ```sh
 cmake --build build/ --config [config] --target PACKAGE
 ```
+
+Alternatively, build the `INSTALL` target from your IDE.
