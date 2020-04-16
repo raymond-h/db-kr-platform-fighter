@@ -52,7 +52,6 @@ file(GLOB SOURCES "src/*.cpp")
 # add the executable
 add_executable(DbKrPlatformFighter ${SOURCES})
 target_include_directories(DbKrPlatformFighter PRIVATE ${GGPO_DIR}/include ${SDL2_INCLUDE_DIRS} ${ENTT_INCLUDE_PATH})
-target_link_directories(DbKrPlatformFighter PRIVATE ${GGPO_LIB_PATH})
 target_link_libraries(DbKrPlatformFighter ${GGPO_DIR}/lib/GGPO.lib ${SDL2_LIBRARIES})
 
 add_custom_command(TARGET DbKrPlatformFighter
