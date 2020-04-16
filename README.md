@@ -21,3 +21,11 @@ Compile the project by whatever means you chose with cmake. Dependencies are dow
 ```sh
 ./build/Debug/DbKrPlatformFighter.exe
 ```
+
+## Packaging
+
+`[config]` should be replaced with any one of `Debug` or `Release` to do respective type of build.
+
+```sh
+cmake --build build/ --config [config] --target PACKAGE
+```
