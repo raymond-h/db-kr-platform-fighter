@@ -62,3 +62,10 @@ add_custom_command(TARGET DbKrPlatformFighter
         "${SDL2_LIB_PATH}/SDL2.dll"
         $<TARGET_FILE_DIR:DbKrPlatformFighter>
 )
+
+install(TARGETS DbKrPlatformFighter DESTINATION .)
+install(FILES "${GGPO_DIR}/bin/GGPO.dll" "${SDL2_LIB_PATH}/SDL2.dll" DESTINATION .)
+
+set(CPACK_GENERATOR "ZIP")
+set(CPACK_PACKAGE_NAME "DbKrPlatformFighter")
+include(CPack)
