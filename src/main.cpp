@@ -5,93 +5,195 @@
 
 using namespace std;
 
-bool ggpo_begin_game(const char *game)
+struct PlayerControllable
 {
-	cout << "begin_game callback: " << game << endl;
-	return true;
+};
+
+struct Position
+{
+	int32_t x;
+	int32_t y;
+};
+
+struct Velocity
+{
+	int32_t x;
+	int32_t y;
+};
+
+bool handleEvent(int32_t &moveX, int32_t &moveY, SDL_Event &event)
+{
+	switch (event.type)
+	{
+	case SDL_QUIT:
+		return true;
+
+	case SDL_KEYDOWN:
+	{
+		if (event.key.repeat)
+			break;
+
+		switch (event.key.keysym.scancode)
+		{
+		case SDL_SCANCODE_LEFT:
+			moveX--;
+			break;
+		case SDL_SCANCODE_RIGHT:
+			moveX++;
+			break;
+		case SDL_SCANCODE_UP:
+			moveY--;
+			break;
+		case SDL_SCANCODE_DOWN:
+			moveY++;
+			break;
+		}
+		break;
+	}
+
+	case SDL_KEYUP:
+	{
+		if (event.key.repeat)
+			break;
+
+		switch (event.key.keysym.scancode)
+		{
+		case SDL_SCANCODE_LEFT:
+			moveX++;
+			break;
+		case SDL_SCANCODE_RIGHT:
+			moveX--;
+			break;
+		case SDL_SCANCODE_UP:
+			moveY++;
+			break;
+		case SDL_SCANCODE_DOWN:
+			moveY--;
+			break;
+		}
+		break;
+	}
+
+	default:
+		break;
+	}
+
+	return false;
 }
 
-bool ggpo_save_game_state(unsigned char **buffer, int *len, int *checksum, int frame)
+void inputUpdate(int32_t moveX, int32_t moveY, entt::registry &registry)
 {
-	return true;
+	auto players = registry.view<PlayerControllable, Velocity>();
+	for (auto &entity : players)
+	{
+		auto &vel = registry.get<Velocity>(entity);
+
+		vel.x = moveX;
+		vel.y = moveY;
+	}
 }
 
-bool ggpo_load_game_state(unsigned char *buffer, int len)
+void positionUpdate(entt::registry &registry)
 {
-	return true;
+	registry.view<Position, Velocity>().each([](Position &pos, Velocity &vel) {
+		pos.x += vel.x;
+		pos.y += vel.y;
+	});
 }
 
-bool ggpo_log_game_state(char *filename, unsigned char *buffer, int len)
+void update(int32_t moveX, int32_t moveY, entt::registry &registry)
 {
-	return true;
+	inputUpdate(moveX, moveY, registry);
+	positionUpdate(registry);
 }
 
-bool ggpo_advance_frame(int flags)
+void render(shared_ptr<SDL_Renderer> renderer, entt::registry &registry)
 {
-	return true;
-}
+	SDL_Renderer* rendererP = renderer.get();
 
-void ggpo_free_buffer(void *buffer)
-{
-	cout << "free_buffer callback: " << buffer << endl;
-}
+	SDL_SetRenderDrawColor(rendererP, 0, 0, 0, 255);
+	SDL_RenderClear(rendererP);
 
-bool ggpo_on_event(GGPOEvent *info)
-{
-	return true;
+	registry.view<Position>().each([rendererP](Position &pos) {
+		SDL_Rect rect;
+		rect.x = pos.x - 8;
+		rect.y = pos.y - 8;
+		rect.w = 16;
+		rect.h = 16;
+		SDL_SetRenderDrawColor(rendererP, 255, 0, 0, 255);
+		SDL_RenderFillRect(rendererP, &rect);
+	});
+
+	SDL_RenderPresent(rendererP);
 }
 
 int main(int argc, char *argv[])
 {
 	entt::registry registry;
 
-	cout << "Hello world! " << &registry << endl;
+	SDL_Init(SDL_INIT_VIDEO);
 
-	GGPOSession *session;
-	GGPOSessionCallbacks cbs = {
-		ggpo_begin_game,
-		ggpo_save_game_state,
-		ggpo_load_game_state,
-		ggpo_log_game_state,
-		ggpo_free_buffer,
-		ggpo_advance_frame,
-		ggpo_on_event};
-	auto res = ggpo_start_session(&session, &cbs, "db kr platform fighter", 2, sizeof(int), 7001);
-	cout << "ggpo_start_session: " << res << endl;
+	shared_ptr<SDL_Window> window(
+		SDL_CreateWindow(
+			"DB KR Platform Fighter",
+			SDL_WINDOWPOS_UNDEFINED,
+			SDL_WINDOWPOS_UNDEFINED,
+			640,
+			480,
+			0),
+		SDL_DestroyWindow);
 
-	res = ggpo_close_session(session);
-	cout << "ggpo_close_session: " << res << endl;
-
-	SDL_Window *window; // Declare a pointer
-
-	SDL_Init(SDL_INIT_VIDEO); // Initialize SDL2
-
-	// Create an application window with the following settings:
-	window = SDL_CreateWindow(
-		"An SDL2 window",		 // window title
-		SDL_WINDOWPOS_UNDEFINED, // initial x position
-		SDL_WINDOWPOS_UNDEFINED, // initial y position
-		640,					 // width, in pixels
-		480,					 // height, in pixels
-		SDL_WINDOW_OPENGL		 // flags - see below
-	);
-
-	// Check that the window was successfully created
-	if (window == NULL)
+	if (window == nullptr)
 	{
-		// In the case that the window could not be made...
 		printf("Could not create window: %s\n", SDL_GetError());
+		SDL_Quit();
 		return 1;
 	}
 
-	// The window is open: could enter program loop here (see SDL_PollEvent())
+	shared_ptr<SDL_Renderer> renderer(
+		SDL_CreateRenderer(window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC), SDL_DestroyRenderer);
 
-	SDL_Delay(3000); // Pause execution for 3000 milliseconds, for example
+	if (renderer == nullptr)
+	{
+		printf("Could not create renderer: %s\n", SDL_GetError());
+		window.reset();
+		SDL_Quit();
+		return 1;
+	}
 
-	// Close and destroy the window
-	SDL_DestroyWindow(window);
+	int32_t moveX = 0, moveY = 0;
 
-	// Clean up
+	auto playerEntity = registry.create();
+	registry.emplace<PlayerControllable>(playerEntity);
+	registry.emplace<Position>(playerEntity, 320, 240);
+	registry.emplace<Velocity>(playerEntity, 0, 0);
+
+	const int frameLength = 1000 / 60;
+
+	bool done = false;
+	while (true)
+	{
+		int frameStartMs = SDL_GetTicks();
+
+		SDL_Event event;
+		while (SDL_PollEvent(&event))
+		{
+			done = handleEvent(moveX, moveY, event);
+			if (done)
+				break;
+		}
+		if (done)
+			break;
+
+		update(moveX, moveY, registry);
+
+		render(renderer, registry);
+
+		int frameEndMs = SDL_GetTicks();
+
+		SDL_Delay(max(0, frameLength - (frameEndMs - frameStartMs)));
+	}
+
 	SDL_Quit();
 
 	return 0;
