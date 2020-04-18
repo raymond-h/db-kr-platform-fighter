@@ -24,19 +24,13 @@ ExternalProject_Add(dependency_sdl
     INSTALL_COMMAND ""
 )
 ExternalProject_Get_Property(dependency_sdl SOURCE_DIR)
-find_path(SDL2_INCLUDE_DIRS SDL.h
-    HINTS ${SOURCE_DIR}
-    PATH_SUFFIXES include
-)
+set(SDL2_INCLUDE_DIRS ${SOURCE_DIR}/include)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(VC_LIB_PATH_SUFFIX lib/x64)
 else()
     set(VC_LIB_PATH_SUFFIX lib/x86)
 endif()
-find_path(SDL2_LIB_PATH SDL2.lib
-    HINTS ${SOURCE_DIR}
-    PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
-)
+set(SDL2_LIB_PATH ${SOURCE_DIR}/${VC_LIB_PATH_SUFFIX})
 set(SDL2_LIBRARIES ${SDL2_LIB_PATH}/SDL2.lib ${SDL2_LIB_PATH}/SDL2main.lib)
 
 # setup ggpo dependency
