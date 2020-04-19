@@ -3,23 +3,9 @@
 #include <entt/entt.hpp>
 #include <SDL.h>
 
+#include "components.hpp"
+
 using namespace std;
-
-struct PlayerControllable
-{
-};
-
-struct Position
-{
-	int32_t x;
-	int32_t y;
-};
-
-struct Velocity
-{
-	int32_t x;
-	int32_t y;
-};
 
 bool handleEvent(int32_t &moveX, int32_t &moveY, SDL_Event &event)
 {
@@ -101,33 +87,180 @@ void positionUpdate(entt::registry &registry)
 	});
 }
 
+void resetCollisionFlags(entt::registry &registry)
+{
+	registry.view<GroundCollisionFlags>().each([](GroundCollisionFlags &groundCollisionFlags) {
+		groundCollisionFlags.left = groundCollisionFlags.top =
+			groundCollisionFlags.right = groundCollisionFlags.bottom = false;
+	});
+}
+
+struct AABB
+{
+	int32_t left, top, right, bottom;
+};
+
+AABB boxForEntity(Position &pos, CollisionBox &cbox)
+{
+	return {
+		pos.x - cbox.width / 2, pos.y - cbox.height / 2,
+		pos.x + cbox.width / 2, pos.y + cbox.height / 2};
+}
+
+void calculateOverlap(AABB a, AABB b, int32_t &outX, int32_t &outY)
+{
+	auto overlapX1 = max(a.right - b.left, 0);
+	auto overlapX2 = min(a.left - b.right, 0);
+	outX = abs(overlapX1) < abs(overlapX2) ? overlapX1 : overlapX2;
+
+	auto overlapY1 = max(a.bottom - b.top, 0);
+	auto overlapY2 = min(a.top - b.bottom, 0);
+	outY = abs(overlapY1) < abs(overlapY2) ? overlapY1 : overlapY2;
+}
+
+void handleGroundCollision(entt::registry &registry, entt::entity ground, entt::entity other)
+{
+	auto [apos, acbox] = registry.get<Position, CollisionBox>(ground);
+	auto [bpos, bcbox] = registry.get<Position, CollisionBox>(other);
+	auto bGColFlags = registry.try_get<GroundCollisionFlags>(other);
+
+	auto aAabb = boxForEntity(apos, acbox);
+	auto bAabb = boxForEntity(bpos, bcbox);
+
+	int32_t overlapX = 0, overlapY = 0;
+	calculateOverlap(aAabb, bAabb, overlapX, overlapY);
+
+	if (abs(overlapX) < abs(overlapY))
+	{
+		bpos.x += overlapX;
+		if (overlapX != 0 && bGColFlags != nullptr)
+		{
+			if (overlapX < 0)
+			{
+				bGColFlags->right = true;
+			}
+			else
+			{
+				bGColFlags->left = true;
+			}
+		}
+	}
+	else
+	{
+		bpos.y += overlapY;
+		if (overlapY != 0 && bGColFlags != nullptr)
+		{
+			if (overlapY < 0)
+			{
+				bGColFlags->bottom = true;
+			}
+			else
+			{
+				bGColFlags->top = true;
+			}
+		}
+	}
+}
+
+void collisionUpdate(entt::registry &registry)
+{
+	auto ents = registry.view<Position, CollisionBox>();
+	auto entsEnd = ents.end();
+	for (auto it = ents.begin(); it != entsEnd; it++)
+	{
+		auto itInner = it;
+		itInner++;
+		for (; itInner != entsEnd; itInner++)
+		{
+			auto a = *it;
+			auto b = *itInner;
+
+			auto aIsGround = registry.has<Ground>(a);
+			auto bIsGround = registry.has<Ground>(b);
+
+			if (aIsGround && !bIsGround)
+			{
+				handleGroundCollision(registry, a, b);
+			}
+			else if (!aIsGround && bIsGround)
+			{
+				handleGroundCollision(registry, b, a);
+			}
+		}
+	}
+}
+
 void update(int32_t moveX, int32_t moveY, entt::registry &registry)
 {
 	inputUpdate(moveX, moveY, registry);
 	positionUpdate(registry);
+	resetCollisionFlags(registry);
+	collisionUpdate(registry);
 }
 
 void render(shared_ptr<SDL_Renderer> renderer, entt::registry &registry)
 {
-	SDL_Renderer* rendererP = renderer.get();
+	SDL_Renderer *rendererP = renderer.get();
 
 	SDL_SetRenderDrawColor(rendererP, 0, 0, 0, 255);
 	SDL_RenderClear(rendererP);
 
-	registry.view<Position>().each([rendererP](Position &pos) {
+	registry.view<Position, CollisionBox>().each([rendererP](Position &pos, CollisionBox &cbox) {
 		SDL_Rect rect;
-		rect.x = pos.x - 8;
-		rect.y = pos.y - 8;
-		rect.w = 16;
-		rect.h = 16;
+		rect.x = pos.x - cbox.width / 2;
+		rect.y = pos.y - cbox.height / 2;
+		rect.w = cbox.width;
+		rect.h = cbox.height;
 		SDL_SetRenderDrawColor(rendererP, 255, 0, 0, 255);
 		SDL_RenderFillRect(rendererP, &rect);
+	});
+
+	registry.view<Position, GroundCollisionFlags>().each([rendererP](Position &pos, GroundCollisionFlags &gcolflags) {
+		const int lineLen = 15;
+
+		SDL_SetRenderDrawColor(rendererP, 0, 255, 0, 255);
+		if (gcolflags.left)
+		{
+			SDL_RenderDrawLine(rendererP, pos.x, pos.y, pos.x - lineLen, pos.y);
+		}
+		if (gcolflags.right)
+		{
+			SDL_RenderDrawLine(rendererP, pos.x, pos.y, pos.x + lineLen, pos.y);
+		}
+		if (gcolflags.top)
+		{
+			SDL_RenderDrawLine(rendererP, pos.x, pos.y, pos.x, pos.y - lineLen);
+		}
+		if (gcolflags.bottom)
+		{
+			SDL_RenderDrawLine(rendererP, pos.x, pos.y, pos.x, pos.y + lineLen);
+		}
 	});
 
 	SDL_RenderPresent(rendererP);
 }
 
-int main(int argc, char *argv[])
+auto createPlayer(entt::registry &registry, int32_t x, int32_t y, int32_t w, int32_t h)
+{
+	auto playerEntity = registry.create();
+	registry.emplace<PlayerControllable>(playerEntity);
+	registry.emplace<Position>(playerEntity, x, y);
+	registry.emplace<CollisionBox>(playerEntity, w, h);
+	registry.emplace<Velocity>(playerEntity, 0, 0);
+	registry.emplace<GroundCollisionFlags>(playerEntity, false, false, false, false);
+	return playerEntity;
+}
+
+auto createGround(entt::registry &registry, int32_t x, int32_t y, int32_t w, int32_t h)
+{
+	auto ent = registry.create();
+	registry.emplace<Position>(ent, x, y);
+	registry.emplace<CollisionBox>(ent, w, h);
+	registry.emplace<Ground>(ent);
+	return ent;
+}
+
+int main_game(int argc, char *argv[])
 {
 	entt::registry registry;
 
@@ -163,10 +296,11 @@ int main(int argc, char *argv[])
 
 	int32_t moveX = 0, moveY = 0;
 
-	auto playerEntity = registry.create();
-	registry.emplace<PlayerControllable>(playerEntity);
-	registry.emplace<Position>(playerEntity, 320, 240);
-	registry.emplace<Velocity>(playerEntity, 0, 0);
+	createGround(registry, 120, 300, 60, 150);
+	createGround(registry, 520, 300, 60, 150);
+	createGround(registry, 320, 240 + 120, 400, 60);
+
+	createPlayer(registry, 320, 240, 16, 16);
 
 	const int frameLength = 1000 / 60;
 
@@ -197,4 +331,55 @@ int main(int argc, char *argv[])
 	SDL_Quit();
 
 	return 0;
+}
+
+int main_test(int argc, char *argv[])
+{
+	{
+		AABB a = {0, 0, 10, 10};
+		AABB b = {5, 3, 15, 13};
+		int32_t outX = 0, outY = 0;
+
+		calculateOverlap(a, b, outX, outY);
+
+		assert(outX == 5);
+	}
+
+	{
+		AABB a = {6, 0, 16, 10};
+		AABB b = {0, 0, 10, 10};
+		int32_t outX = 0, outY = 0;
+
+		calculateOverlap(a, b, outX, outY);
+
+		assert(outX == -4);
+	}
+
+	{
+		AABB a = {12, 0, 22, 10};
+		AABB b = {0, 0, 10, 10};
+		int32_t outX = 0, outY = 0;
+
+		calculateOverlap(a, b, outX, outY);
+
+		assert(outX == 0);
+	}
+
+	{
+		AABB a = {0, 0, 10, 10};
+		AABB b = {0, 0, 10, 10};
+		int32_t outX = 0, outY = 0;
+
+		calculateOverlap(a, b, outX, outY);
+
+		assert(outX == 10 || outX == -10);
+	}
+
+	return 0;
+}
+
+int main(int argc, char *argv[])
+{
+	// return main_test(argc, argv);
+	return main_game(argc, argv);
 }
