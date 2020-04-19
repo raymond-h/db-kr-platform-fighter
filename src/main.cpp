@@ -69,19 +69,31 @@ bool handleEvent(int32_t &moveX, int32_t &moveY, SDL_Event &event)
 
 void inputUpdate(int32_t moveX, int32_t moveY, entt::registry &registry)
 {
-	auto players = registry.view<PlayerControllable, Velocity>();
+	auto players = registry.view<PlayerControllable, Velocity, GroundCollisionFlags>();
 	for (auto &entity : players)
 	{
-		auto &vel = registry.get<Velocity>(entity);
+		auto [vel, gColFlags] = registry.get<Velocity, GroundCollisionFlags>(entity);
 
-		vel.x = moveX;
-		vel.y = moveY;
+		vel.x = moveX * 2;
+		if (gColFlags.bottom && moveY < 0)
+		{
+			vel.y = -10;
+		}
 	}
 }
 
 void positionUpdate(entt::registry &registry)
 {
-	registry.view<Position, Velocity>().each([](Position &pos, Velocity &vel) {
+	registry.view<Position, Velocity, GroundCollisionFlags>().each([](Position &pos, Velocity &vel, GroundCollisionFlags &gColFlags) {
+		if (gColFlags.bottom && vel.y > 0)
+		{
+			vel.y = 0;
+		}
+		else
+		{
+			vel.y += 1;
+		}
+
 		pos.x += vel.x;
 		pos.y += vel.y;
 	});
