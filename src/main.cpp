@@ -321,51 +321,6 @@ int main_game(int argc, char *argv[])
 	return 0;
 }
 
-int main_test(int argc, char *argv[])
-{
-	{
-		AABB a = {0, 0, 10, 10};
-		AABB b = {5, 3, 15, 13};
-		int32_t outX = 0, outY = 0;
-
-		calculateOverlap(a, b, outX, outY);
-
-		assert(outX == 5);
-	}
-
-	{
-		AABB a = {6, 0, 16, 10};
-		AABB b = {0, 0, 10, 10};
-		int32_t outX = 0, outY = 0;
-
-		calculateOverlap(a, b, outX, outY);
-
-		assert(outX == -4);
-	}
-
-	{
-		AABB a = {12, 0, 22, 10};
-		AABB b = {0, 0, 10, 10};
-		int32_t outX = 0, outY = 0;
-
-		calculateOverlap(a, b, outX, outY);
-
-		assert(outX == 0);
-	}
-
-	{
-		AABB a = {0, 0, 10, 10};
-		AABB b = {0, 0, 10, 10};
-		int32_t outX = 0, outY = 0;
-
-		calculateOverlap(a, b, outX, outY);
-
-		assert(outX == 10 || outX == -10);
-	}
-
-	return 0;
-}
-
 int main(int argc, char *argv[])
 {
 	return main_game(argc, argv);
