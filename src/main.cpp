@@ -90,10 +90,8 @@ void positionUpdate(entt::registry &registry)
 		{
 			vel.y = 0;
 		}
-		else
-		{
-			vel.y += 1;
-		}
+
+		vel.y += 1;
 
 		pos.x += vel.x;
 		pos.y += vel.y;
