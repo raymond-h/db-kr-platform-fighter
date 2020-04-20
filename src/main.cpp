@@ -4,6 +4,7 @@
 #include <SDL.h>
 
 #include "components.hpp"
+#include "aabb.hpp"
 
 using namespace std;
 
@@ -105,29 +106,6 @@ void resetCollisionFlags(entt::registry &registry)
 		groundCollisionFlags.left = groundCollisionFlags.top =
 			groundCollisionFlags.right = groundCollisionFlags.bottom = false;
 	});
-}
-
-struct AABB
-{
-	int32_t left, top, right, bottom;
-};
-
-AABB boxForEntity(Position &pos, CollisionBox &cbox)
-{
-	return {
-		pos.x - cbox.width / 2, pos.y - cbox.height / 2,
-		pos.x + cbox.width / 2, pos.y + cbox.height / 2};
-}
-
-void calculateOverlap(AABB a, AABB b, int32_t &outX, int32_t &outY)
-{
-	auto overlapX1 = max(a.right - b.left, 0);
-	auto overlapX2 = min(a.left - b.right, 0);
-	outX = abs(overlapX1) < abs(overlapX2) ? overlapX1 : overlapX2;
-
-	auto overlapY1 = max(a.bottom - b.top, 0);
-	auto overlapY2 = min(a.top - b.bottom, 0);
-	outY = abs(overlapY1) < abs(overlapY2) ? overlapY1 : overlapY2;
 }
 
 void handleGroundCollision(entt::registry &registry, entt::entity ground, entt::entity other)
@@ -392,6 +370,5 @@ int main_test(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	// return main_test(argc, argv);
 	return main_game(argc, argv);
 }
