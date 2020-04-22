@@ -15,10 +15,11 @@ FetchContent_MakeAvailable(catch2)
 set(CATCH2_INCLUDE_DIR ${catch2_SOURCE_DIR}/single_include)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${catch2_SOURCE_DIR}/contrib/")
 
-file(GLOB TEST_SOURCES "*.cpp")
+file(GLOB TEST_SOURCES "*.cpp" "../src/fixed.cpp")
 
 add_executable(TestExec ${TEST_SOURCES})
 target_include_directories(TestExec PRIVATE "${CATCH2_INCLUDE_DIR}" "../src")
+target_link_libraries(TestExec PRIVATE Boost_Headers)
 
 include(CTest)
 include(Catch)

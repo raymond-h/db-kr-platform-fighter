@@ -1,20 +1,24 @@
 #ifndef __COMPONENTS_HPP__
 #define __COMPONENTS_HPP__
 
+#include "fixed.hpp"
+
+typedef Fixed coord_t;
+
 struct PlayerControllable
 {
 };
 
 struct Position
 {
-	int32_t x;
-	int32_t y;
+	coord_t x;
+	coord_t y;
 };
 
 struct CollisionBox
 {
-	int32_t width;
-	int32_t height;
+	coord_t width;
+	coord_t height;
 };
 
 struct GroundCollisionFlags
@@ -24,8 +28,8 @@ struct GroundCollisionFlags
 
 struct Velocity
 {
-	int32_t x;
-	int32_t y;
+	coord_t x;
+	coord_t y;
 };
 
 struct Ground

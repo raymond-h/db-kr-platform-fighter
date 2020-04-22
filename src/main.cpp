@@ -5,6 +5,7 @@
 
 #include "components.hpp"
 #include "aabb.hpp"
+#include "fixed.hpp"
 
 using namespace std;
 
@@ -68,17 +69,17 @@ bool handleEvent(int32_t &moveX, int32_t &moveY, SDL_Event &event)
 	return false;
 }
 
-void inputUpdate(int32_t moveX, int32_t moveY, entt::registry &registry)
+void inputUpdate(coord_t moveX, coord_t moveY, entt::registry &registry)
 {
 	auto players = registry.view<PlayerControllable, Velocity, GroundCollisionFlags>();
 	for (auto &entity : players)
 	{
 		auto [vel, gColFlags] = registry.get<Velocity, GroundCollisionFlags>(entity);
 
-		vel.x = moveX * 2;
+		vel.x = moveX * 5 / 2;
 		if (gColFlags.bottom && moveY < 0)
 		{
-			vel.y = -10;
+			vel.y = -5;
 		}
 	}
 }
@@ -91,7 +92,7 @@ void positionUpdate(entt::registry &registry)
 			vel.y = 0;
 		}
 
-		vel.y += 1;
+		vel.y += Fixed(1) / 10;
 
 		pos.x += vel.x;
 		pos.y += vel.y;
@@ -115,7 +116,7 @@ void handleGroundCollision(entt::registry &registry, entt::entity ground, entt::
 	auto aAabb = boxForEntity(apos, acbox);
 	auto bAabb = boxForEntity(bpos, bcbox);
 
-	int32_t overlapX = 0, overlapY = 0;
+	coord_t overlapX = 0, overlapY = 0;
 	calculateOverlap(aAabb, bAabb, overlapX, overlapY);
 
 	if (abs(overlapX) < abs(overlapY))
@@ -178,7 +179,7 @@ void collisionUpdate(entt::registry &registry)
 	}
 }
 
-void update(int32_t moveX, int32_t moveY, entt::registry &registry)
+void update(coord_t moveX, coord_t moveY, entt::registry &registry)
 {
 	inputUpdate(moveX, moveY, registry);
 	positionUpdate(registry);
@@ -195,10 +196,10 @@ void render(shared_ptr<SDL_Renderer> renderer, entt::registry &registry)
 
 	registry.view<Position, CollisionBox>().each([rendererP](Position &pos, CollisionBox &cbox) {
 		SDL_Rect rect;
-		rect.x = pos.x - cbox.width / 2;
-		rect.y = pos.y - cbox.height / 2;
-		rect.w = cbox.width;
-		rect.h = cbox.height;
+		rect.x = int(pos.x - cbox.width / 2);
+		rect.y = int(pos.y - cbox.height / 2);
+		rect.w = int(cbox.width);
+		rect.h = int(cbox.height);
 		SDL_SetRenderDrawColor(rendererP, 255, 0, 0, 255);
 		SDL_RenderFillRect(rendererP, &rect);
 	});
@@ -206,29 +207,31 @@ void render(shared_ptr<SDL_Renderer> renderer, entt::registry &registry)
 	registry.view<Position, GroundCollisionFlags>().each([rendererP](Position &pos, GroundCollisionFlags &gcolflags) {
 		const int lineLen = 15;
 
+		int32_t x = (int32_t)pos.x, y = (int32_t)pos.y;
+
 		SDL_SetRenderDrawColor(rendererP, 0, 255, 0, 255);
 		if (gcolflags.left)
 		{
-			SDL_RenderDrawLine(rendererP, pos.x, pos.y, pos.x - lineLen, pos.y);
+			SDL_RenderDrawLine(rendererP, x, y, x - lineLen, y);
 		}
 		if (gcolflags.right)
 		{
-			SDL_RenderDrawLine(rendererP, pos.x, pos.y, pos.x + lineLen, pos.y);
+			SDL_RenderDrawLine(rendererP, x, y, x + lineLen, y);
 		}
 		if (gcolflags.top)
 		{
-			SDL_RenderDrawLine(rendererP, pos.x, pos.y, pos.x, pos.y - lineLen);
+			SDL_RenderDrawLine(rendererP, x, y, x, y - lineLen);
 		}
 		if (gcolflags.bottom)
 		{
-			SDL_RenderDrawLine(rendererP, pos.x, pos.y, pos.x, pos.y + lineLen);
+			SDL_RenderDrawLine(rendererP, x, y, x, y + lineLen);
 		}
 	});
 
 	SDL_RenderPresent(rendererP);
 }
 
-auto createPlayer(entt::registry &registry, int32_t x, int32_t y, int32_t w, int32_t h)
+auto createPlayer(entt::registry &registry, coord_t x, coord_t y, coord_t w, coord_t h)
 {
 	auto playerEntity = registry.create();
 	registry.emplace<PlayerControllable>(playerEntity);
@@ -239,7 +242,7 @@ auto createPlayer(entt::registry &registry, int32_t x, int32_t y, int32_t w, int
 	return playerEntity;
 }
 
-auto createGround(entt::registry &registry, int32_t x, int32_t y, int32_t w, int32_t h)
+auto createGround(entt::registry &registry, coord_t x, coord_t y, coord_t w, coord_t h)
 {
 	auto ent = registry.create();
 	registry.emplace<Position>(ent, x, y);

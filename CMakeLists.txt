@@ -12,6 +12,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 enable_testing()
 add_subdirectory("./test")
 
+add_subdirectory("./dependencies")
+
 # setup entt dependency
 find_path(ENTT_INCLUDE_PATH entt/entt.hpp
   HINTS "./dependencies/entt"
@@ -50,7 +52,7 @@ file(GLOB SOURCES "src/*.cpp")
 add_executable(DbKrPlatformFighter ${SOURCES})
 add_dependencies(DbKrPlatformFighter dependency_sdl dependency_ggpo)
 target_include_directories(DbKrPlatformFighter PRIVATE ${GGPO_DIR}/include ${SDL2_INCLUDE_DIRS} ${ENTT_INCLUDE_PATH})
-target_link_libraries(DbKrPlatformFighter ${GGPO_DIR}/lib/GGPO.lib ${SDL2_LIBRARIES})
+target_link_libraries(DbKrPlatformFighter Boost_Headers ${GGPO_DIR}/lib/GGPO.lib ${SDL2_LIBRARIES})
 
 add_custom_command(TARGET DbKrPlatformFighter
     POST_BUILD

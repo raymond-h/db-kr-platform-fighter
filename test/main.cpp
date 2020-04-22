@@ -7,7 +7,7 @@ TEST_CASE("overlap b to right", "[aabb]")
 {
     AABB a = {0, 0, 10, 10};
     AABB b = {5, 3, 15, 13};
-    int32_t outX = 0, outY = 0;
+    coord_t outX = 0, outY = 0;
 
     calculateOverlap(a, b, outX, outY);
 
@@ -18,7 +18,7 @@ TEST_CASE("overlap b to left", "[aabb]")
 {
     AABB a = {6, 0, 16, 10};
     AABB b = {0, 0, 10, 10};
-    int32_t outX = 0, outY = 0;
+    coord_t outX = 0, outY = 0;
 
     calculateOverlap(a, b, outX, outY);
 
@@ -29,7 +29,7 @@ TEST_CASE("no overlap", "[aabb]")
 {
     AABB a = {12, 0, 22, 10};
     AABB b = {0, 0, 10, 10};
-    int32_t outX = 0, outY = 0;
+    coord_t outX = 0, outY = 0;
 
     calculateOverlap(a, b, outX, outY);
 
@@ -40,7 +40,7 @@ TEST_CASE("complete overlap", "[aabb]")
 {
     AABB a = {0, 0, 10, 10};
     AABB b = {0, 0, 10, 10};
-    int32_t outX = 0, outY = 0;
+    coord_t outX = 0, outY = 0;
 
     calculateOverlap(a, b, outX, outY);
 
