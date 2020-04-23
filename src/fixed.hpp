@@ -37,7 +37,7 @@ public:
     bool operator==(Fixed const &rhs) const { return _value == rhs._value; }
     bool operator<(Fixed const &rhs) const { return _value < rhs._value; }
 
-    Fixed operator-() { return from_raw(-_value); }
+    Fixed operator-() const { return from_raw(-_value); }
 
     Fixed operator+=(Fixed const &rhs)
     {
