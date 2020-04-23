@@ -37,6 +37,8 @@ public:
     bool operator==(Fixed const &rhs) const { return _value == rhs._value; }
     bool operator<(Fixed const &rhs) const { return _value < rhs._value; }
 
+    Fixed operator-() { return from_raw(-_value); }
+
     Fixed operator+=(Fixed const &rhs)
     {
         _value += rhs._value;
@@ -82,6 +84,7 @@ constexpr Fixed operator"" _f(const char *s, std::size_t len)
 {
     Fixed acc = 0;
     size_t i = 0;
+    int32_t negaFactor = (len > 0 && s[0] == '-') ? -1 : 1;
     for (; i < len; i++)
     {
         const char c = s[i];
@@ -104,7 +107,7 @@ constexpr Fixed operator"" _f(const char *s, std::size_t len)
         }
     }
 
-    return Fixed::from_raw(acc.raw() + accFrac.raw());
+    return Fixed::from_raw(negaFactor * (acc.raw() + accFrac.raw()));
 }
 
 #endif // __FIXED_HPP__

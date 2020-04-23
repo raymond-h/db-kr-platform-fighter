@@ -42,6 +42,15 @@ TEST_CASE("division", "[fixed]")
     REQUIRE(actual == expected);
 }
 
+TEST_CASE("negation", "[fixed]")
+{
+    Fixed a = Fixed(5) / 2; // 2.5
+    Fixed aNeg = -a; // -2.5
+    Fixed expected = Fixed::from_fraction(5, 2) * -1; // -2.5
+
+    REQUIRE(aNeg == expected);
+}
+
 TEST_CASE("from fraction", "[fixed]")
 {
     Fixed a = Fixed::from_fraction(5, 2); // 2.5
@@ -71,6 +80,14 @@ TEST_CASE("literal 25.56", "[fixed]")
 {
     Fixed a = "25.56"_f; // 25.56
     Fixed expected = Fixed::from_fraction(2556, 100); // 25.56
+
+    REQUIRE(a == expected);
+}
+
+TEST_CASE("literal -25.56", "[fixed]")
+{
+    Fixed a = "-25.56"_f; // -25.56
+    Fixed expected = -"25.56"_f; // -25.56
 
     REQUIRE(a == expected);
 }
