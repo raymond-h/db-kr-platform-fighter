@@ -2,9 +2,11 @@
 ### Building
 - Visual Studio 2017+
 - CMake 3.10+
+- vcpkg 2020.04 or later
 
 ### Used by project (automatically downloaded)
-- SDL2 (development files for Visual Studio)
+- Boost
+- SDL2
 - GGPO
 - EnTT
 
