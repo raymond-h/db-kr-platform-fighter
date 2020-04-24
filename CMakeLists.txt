@@ -2,6 +2,17 @@ cmake_minimum_required(VERSION 3.10)
 
 include(FetchContent)
 
+execute_process(
+    COMMAND "${GITCOMMAND}" "submodule" "update" "--init"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+if(DEFINED ENV{VCPKG_ROOT})
+    set(VCPKG_PACKAGES "sdl2" "boost-utility" "catch2")
+
+    execute_process(COMMAND "$ENV{VCPKG_ROOT}/vcpkg" "install" ${VCPKG_PACKAGES})
+endif()
+
 if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
 endif()
