@@ -46,7 +46,7 @@ ExternalProject_Add(dependency_ggpo
 ExternalProject_Get_Property(dependency_ggpo BINARY_DIR)
 set(GGPO_DIR ${BINARY_DIR}/installed)
 
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB SOURCES "src/*.cpp" "src/*.c")
 
 # add the executable
 add_executable(DbKrPlatformFighter ${SOURCES})
