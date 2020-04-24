@@ -9,7 +9,7 @@
 
 using namespace std;
 
-bool handleEvent(int32_t &moveX, int32_t &moveY, SDL_Event &event)
+bool handleEvent(int32_t& moveX, int32_t& moveY, SDL_Event& event)
 {
 	switch (event.type)
 	{
@@ -69,10 +69,10 @@ bool handleEvent(int32_t &moveX, int32_t &moveY, SDL_Event &event)
 	return false;
 }
 
-void inputUpdate(coord_t moveX, coord_t moveY, entt::registry &registry)
+void inputUpdate(coord_t moveX, coord_t moveY, entt::registry& registry)
 {
 	auto players = registry.view<PlayerControllable, Velocity, GroundCollisionFlags>();
-	for (auto &entity : players)
+	for (auto& entity : players)
 	{
 		auto [vel, gColFlags] = registry.get<Velocity, GroundCollisionFlags>(entity);
 
@@ -84,9 +84,9 @@ void inputUpdate(coord_t moveX, coord_t moveY, entt::registry &registry)
 	}
 }
 
-void positionUpdate(entt::registry &registry)
+void positionUpdate(entt::registry& registry)
 {
-	registry.view<Position, Velocity, GroundCollisionFlags>().each([](Position &pos, Velocity &vel, GroundCollisionFlags &gColFlags) {
+	registry.view<Position, Velocity, GroundCollisionFlags>().each([](Position& pos, Velocity& vel, GroundCollisionFlags& gColFlags) {
 		if (gColFlags.bottom && vel.y > 0)
 		{
 			vel.y = 0;
@@ -96,18 +96,18 @@ void positionUpdate(entt::registry &registry)
 
 		pos.x += vel.x;
 		pos.y += vel.y;
-	});
+		});
 }
 
-void resetCollisionFlags(entt::registry &registry)
+void resetCollisionFlags(entt::registry& registry)
 {
-	registry.view<GroundCollisionFlags>().each([](GroundCollisionFlags &groundCollisionFlags) {
+	registry.view<GroundCollisionFlags>().each([](GroundCollisionFlags& groundCollisionFlags) {
 		groundCollisionFlags.left = groundCollisionFlags.top =
 			groundCollisionFlags.right = groundCollisionFlags.bottom = false;
-	});
+		});
 }
 
-void handleGroundCollision(entt::registry &registry, entt::entity ground, entt::entity other)
+void handleGroundCollision(entt::registry& registry, entt::entity ground, entt::entity other)
 {
 	auto [apos, acbox] = registry.get<Position, CollisionBox>(ground);
 	auto [bpos, bcbox] = registry.get<Position, CollisionBox>(other);
@@ -151,7 +151,7 @@ void handleGroundCollision(entt::registry &registry, entt::entity ground, entt::
 	}
 }
 
-void collisionUpdate(entt::registry &registry)
+void collisionUpdate(entt::registry& registry)
 {
 	auto ents = registry.view<Position, CollisionBox>();
 	auto entsEnd = ents.end();
@@ -179,7 +179,7 @@ void collisionUpdate(entt::registry &registry)
 	}
 }
 
-void update(coord_t moveX, coord_t moveY, entt::registry &registry)
+void update(coord_t moveX, coord_t moveY, entt::registry& registry)
 {
 	inputUpdate(moveX, moveY, registry);
 	positionUpdate(registry);
@@ -187,14 +187,14 @@ void update(coord_t moveX, coord_t moveY, entt::registry &registry)
 	collisionUpdate(registry);
 }
 
-void render(shared_ptr<SDL_Renderer> renderer, entt::registry &registry)
+void render(shared_ptr<SDL_Renderer> renderer, entt::registry& registry)
 {
-	SDL_Renderer *rendererP = renderer.get();
+	SDL_Renderer* rendererP = renderer.get();
 
 	SDL_SetRenderDrawColor(rendererP, 0, 0, 0, 255);
 	SDL_RenderClear(rendererP);
 
-	registry.view<Position, CollisionBox>().each([rendererP](Position &pos, CollisionBox &cbox) {
+	registry.view<Position, CollisionBox>().each([rendererP](Position& pos, CollisionBox& cbox) {
 		SDL_Rect rect;
 		rect.x = int(pos.x - cbox.width / 2);
 		rect.y = int(pos.y - cbox.height / 2);
@@ -202,9 +202,9 @@ void render(shared_ptr<SDL_Renderer> renderer, entt::registry &registry)
 		rect.h = int(cbox.height);
 		SDL_SetRenderDrawColor(rendererP, 255, 0, 0, 255);
 		SDL_RenderFillRect(rendererP, &rect);
-	});
+		});
 
-	registry.view<Position, GroundCollisionFlags>().each([rendererP](Position &pos, GroundCollisionFlags &gcolflags) {
+	registry.view<Position, GroundCollisionFlags>().each([rendererP](Position& pos, GroundCollisionFlags& gcolflags) {
 		const int lineLen = 15;
 
 		int32_t x = (int32_t)pos.x, y = (int32_t)pos.y;
@@ -226,12 +226,12 @@ void render(shared_ptr<SDL_Renderer> renderer, entt::registry &registry)
 		{
 			SDL_RenderDrawLine(rendererP, x, y, x, y + lineLen);
 		}
-	});
+		});
 
 	SDL_RenderPresent(rendererP);
 }
 
-auto createPlayer(entt::registry &registry, coord_t x, coord_t y, coord_t w, coord_t h)
+auto createPlayer(entt::registry& registry, coord_t x, coord_t y, coord_t w, coord_t h)
 {
 	auto playerEntity = registry.create();
 	registry.emplace<PlayerControllable>(playerEntity);
@@ -242,7 +242,7 @@ auto createPlayer(entt::registry &registry, coord_t x, coord_t y, coord_t w, coo
 	return playerEntity;
 }
 
-auto createGround(entt::registry &registry, coord_t x, coord_t y, coord_t w, coord_t h)
+auto createGround(entt::registry& registry, coord_t x, coord_t y, coord_t w, coord_t h)
 {
 	auto ent = registry.create();
 	registry.emplace<Position>(ent, x, y);
@@ -251,7 +251,7 @@ auto createGround(entt::registry &registry, coord_t x, coord_t y, coord_t w, coo
 	return ent;
 }
 
-int main_game(int argc, char *argv[])
+int main_game(int argc, char* argv[])
 {
 	entt::registry registry;
 
@@ -324,7 +324,7 @@ int main_game(int argc, char *argv[])
 	return 0;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	return main_game(argc, argv);
 }
