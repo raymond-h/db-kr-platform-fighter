@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-include(ExternalProject)
+include(FetchContent)
 
 if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
@@ -12,10 +12,20 @@ project(DbKrPlatformFighter)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-enable_testing()
-add_subdirectory("./test")
+# setup ggpo dependency
+FetchContent_Declare(dependency_ggpo
+    GIT_REPOSITORY https://github.com/pond3r/ggpo
+    GIT_TAG 7ddadef8546a7d99ff0b3530c6056bc8ee4b9c0a
+)
+FetchContent_GetProperties(dependency_ggpo)
+if(NOT dependency_ggpo_POPULATED)
+  FetchContent_Populate(dependency_ggpo)
 
-add_subdirectory("./dependencies")
+  add_subdirectory(${dependency_ggpo_SOURCE_DIR} ${dependency_ggpo_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+# setup boost dependency
+find_package(Boost REQUIRED)
 
 # setup entt dependency
 find_path(ENTT_INCLUDE_PATH entt/entt.hpp
@@ -27,35 +37,27 @@ find_path(ENTT_INCLUDE_PATH entt/entt.hpp
 # setup sdl2 dependency
 find_package(SDL2 CONFIG REQUIRED)
 
-# setup ggpo dependency
-ExternalProject_Add(dependency_ggpo
-    GIT_REPOSITORY https://github.com/pond3r/ggpo
-    GIT_TAG 7ddadef8546a7d99ff0b3530c6056bc8ee4b9c0a
-)
-ExternalProject_Get_Property(dependency_ggpo BINARY_DIR)
-set(GGPO_DIR ${BINARY_DIR}/installed)
-
 file(GLOB SOURCES "src/*.cpp" "src/*.c")
-set(DLLS "${GGPO_DIR}/bin/GGPO.dll")
 
 # add the executable
 add_executable(DbKrPlatformFighter ${SOURCES})
-add_dependencies(DbKrPlatformFighter dependency_ggpo)
-target_include_directories(DbKrPlatformFighter PRIVATE ${GGPO_DIR}/include ${ENTT_INCLUDE_PATH})
-target_link_libraries(DbKrPlatformFighter Boost_Headers SDL2::SDL2 SDL2::SDL2main ${GGPO_DIR}/lib/GGPO.lib)
+target_include_directories(DbKrPlatformFighter PRIVATE ${ENTT_INCLUDE_PATH})
+target_link_libraries(DbKrPlatformFighter PRIVATE Boost::headers SDL2::SDL2 SDL2::SDL2main GGPO)
 
 add_custom_command(TARGET DbKrPlatformFighter
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${DLLS}
+        $<TARGET_FILE:GGPO>
+        $<TARGET_FILE:SDL2::SDL2>
         $<TARGET_FILE_DIR:DbKrPlatformFighter>
 )
 
 install(TARGETS DbKrPlatformFighter DESTINATION .)
-
-get_target_property(SDL2_DLL SDL2::SDL2 IMPORTED_LOCATION_RELEASE)
-install(FILES ${DLLS} "${SDL2_DLL}" DESTINATION .)
+install(FILES $<TARGET_FILE:GGPO> $<TARGET_FILE:SDL2::SDL2> DESTINATION .)
 
 set(CPACK_GENERATOR "ZIP")
 set(CPACK_PACKAGE_NAME "DbKrPlatformFighter")
 include(CPack)
+
+enable_testing()
+add_subdirectory("./test")
