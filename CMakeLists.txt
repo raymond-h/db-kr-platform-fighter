@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 include(FetchContent)
 
 execute_process(
-    COMMAND "${GITCOMMAND}" "submodule" "update" "--init"
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND "git" "submodule" "update" "--init"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 
 if(DEFINED ENV{VCPKG_ROOT})
