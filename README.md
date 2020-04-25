@@ -12,11 +12,11 @@
 
 ## Setting up
 
-This project uses CMake to manage dependencies and build the project.
+This project uses CMake to build the project and (mostly) vcpkg to manage dependencies. Ensure that vcpkg has been set up on your PC (AKA git clone and bootstrap it), and set environment variable `VCPKG_ROOT` to the root of the cloned vcpkg repo (the same folder you'll find the built program `vcpkg.exe`).
 
 ## Building
 
-Compile the project by whatever means you chose with cmake. Dependencies are downloaded and built automatically.
+Compile the project by whatever means you chose with cmake. Dependencies are downloaded and built automatically if vcpkg is installed and set up.
 
 ## Running
 
