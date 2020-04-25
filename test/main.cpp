@@ -46,3 +46,19 @@ TEST_CASE("complete overlap", "[aabb]")
 
     REQUIRE((outX == 10 || outX == -10));
 }
+
+TEST_CASE("test overlap (positive)", "[aabb]")
+{
+    AABB a = {0, 0, 10, 10};
+    AABB b = {5, 0, 15, 10};
+
+    REQUIRE(isOverlap(a, b) == true);
+}
+
+TEST_CASE("test overlap (negative)", "[aabb]")
+{
+    AABB a = {0, 0, 10, 10};
+    AABB b = {12, 0, 22, 10};
+
+    REQUIRE(isOverlap(a, b) == false);
+}
