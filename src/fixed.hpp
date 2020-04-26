@@ -19,8 +19,11 @@ public:
     int32_t const raw() const { return _value; }
     int32_t const int_value() const { return _value >> FRACTION_BITS; }
     double const double_value() const { return (double)_value / (double)ONE_VALUE; }
+    float const float_value() const { return (float)_value / (float)ONE_VALUE; }
 
     explicit operator int32_t() const { return int_value(); }
+    explicit operator double_t() const { return double_value(); }
+    explicit operator float_t() const { return float_value(); }
 
     constexpr static Fixed from_int(int32_t v) { return Fixed(v); }
     constexpr static Fixed from_raw(int32_t v)
