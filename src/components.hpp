@@ -4,6 +4,7 @@
 #include <entt/entt.hpp>
 
 #include "fixed.hpp"
+#include "aabb.hpp"
 
 typedef Fixed coord_t;
 
@@ -54,5 +55,12 @@ struct RemoveAfterLifetime
 {
 	int32_t lifetime;
 };
+
+inline AABB boxForEntity(Position& pos, CollisionBox& cbox)
+{
+	return {
+		pos.x - cbox.width / 2, pos.y - cbox.height / 2,
+		pos.x + cbox.width / 2, pos.y + cbox.height / 2 };
+}
 
 #endif // __COMPONENTS_HPP__

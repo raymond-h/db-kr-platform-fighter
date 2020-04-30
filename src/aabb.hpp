@@ -6,14 +6,12 @@
 
 #include "fixed.hpp"
 
-typedef Fixed coord_t;
-
 struct AABB
 {
-	coord_t left, top, right, bottom;
+	Fixed left, top, right, bottom;
 };
 
-void calculateOverlap(AABB a, AABB b, coord_t& outX, coord_t& outY);
+void calculateOverlap(AABB a, AABB b, Fixed& outX, Fixed& outY);
 
 bool isOverlap(AABB a, AABB b);
 
