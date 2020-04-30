@@ -1,0 +1,6 @@
+#include "input_update.hpp"
+#include "position_update.hpp"
+#include "reset_collision_flags.hpp"
+#include "collision_update.hpp"
+#include "update.hpp"
+#include "render.hpp"
