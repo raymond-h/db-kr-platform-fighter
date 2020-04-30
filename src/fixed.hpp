@@ -65,6 +65,12 @@ public:
 
     Fixed abs() const { return _value > 0 ? *this : from_raw(-_value); }
 
+    template <class Archive>
+    void serialize(Archive &archive)
+    {
+        archive(_value);
+    }
+
 private:
     int32_t _value;
 };
@@ -96,11 +102,12 @@ constexpr Fixed operator"" _f(const char *s, std::size_t len)
             int32_t n = c - '0';
             acc = (acc * 10) + n;
         }
-        else if (c == '.') break;
+        else if (c == '.')
+            break;
     }
 
     Fixed accFrac = 0;
-    for (size_t iRev = len-1; iRev > i; iRev--)
+    for (size_t iRev = len - 1; iRev > i; iRev--)
     {
         const char c = s[iRev];
         if (c >= '0' && c <= '9')

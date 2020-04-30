@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <ggponet.h>
 #include <entt/entt.hpp>
 #include <SDL.h>
@@ -6,10 +7,11 @@
 #include "components.hpp"
 #include "aabb.hpp"
 #include "fixed.hpp"
+#include "snapshot.hpp"
 
 using namespace std;
 
-bool handleEvent(int32_t &moveX, int32_t &moveY, SDL_Event &event)
+bool handleEvent(entt::registry& registry, int32_t &moveX, int32_t &moveY, SDL_Event &event)
 {
 	switch (event.type)
 	{
@@ -34,6 +36,12 @@ bool handleEvent(int32_t &moveX, int32_t &moveY, SDL_Event &event)
 			break;
 		case SDL_SCANCODE_DOWN:
 			moveY++;
+			break;
+		case SDL_SCANCODE_S:
+			auto res = saveSnapshot(registry);
+			ofstream fout("out.bin", ios::binary);
+			fout << res;
+			fout.close();
 			break;
 		}
 		break;
@@ -235,6 +243,7 @@ auto createPlayer(entt::registry &registry, coord_t x, coord_t y, coord_t w, coo
 {
 	auto playerEntity = registry.create();
 	registry.emplace<PlayerControllable>(playerEntity);
+	registry.emplace<NetSynced>(playerEntity);
 	registry.emplace<Position>(playerEntity, x, y);
 	registry.emplace<CollisionBox>(playerEntity, w, h);
 	registry.emplace<Velocity>(playerEntity, 0, 0);
@@ -295,6 +304,13 @@ int main_game(int argc, char *argv[])
 
 	const int frameLength = 1000 / 60;
 
+	// ArchiveExperiment archiveEx;
+
+	// registry.snapshot()
+	// 	.entities(archiveEx)
+	// 	.destroyed(archiveEx)
+	// 	.component<Position, Velocity>(archiveEx);
+
 	bool done = false;
 	while (true)
 	{
@@ -303,7 +319,7 @@ int main_game(int argc, char *argv[])
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			done = handleEvent(moveX, moveY, event);
+			done = handleEvent(registry, moveX, moveY, event);
 			if (done)
 				break;
 		}

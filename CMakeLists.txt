@@ -8,7 +8,7 @@ execute_process(
 )
 
 if(DEFINED ENV{VCPKG_ROOT})
-    set(VCPKG_PACKAGES "sdl2" "boost-utility" "catch2")
+    set(VCPKG_PACKAGES "sdl2" "boost-utility" "catch2" "cereal")
 
     execute_process(COMMAND "$ENV{VCPKG_ROOT}/vcpkg" "install" ${VCPKG_PACKAGES})
 endif()
@@ -48,12 +48,14 @@ find_path(ENTT_INCLUDE_PATH entt/entt.hpp
 # setup sdl2 dependency
 find_package(SDL2 CONFIG REQUIRED)
 
+find_package(cereal CONFIG REQUIRED)
+
 file(GLOB SOURCES "src/*.cpp" "src/*.c")
 
 # add the executable
 add_executable(DbKrPlatformFighter ${SOURCES})
 target_include_directories(DbKrPlatformFighter PRIVATE ${ENTT_INCLUDE_PATH})
-target_link_libraries(DbKrPlatformFighter PRIVATE Boost::headers SDL2::SDL2 SDL2::SDL2main GGPO)
+target_link_libraries(DbKrPlatformFighter PRIVATE Boost::headers SDL2::SDL2 SDL2::SDL2main GGPO cereal)
 
 add_custom_command(TARGET DbKrPlatformFighter
     POST_BUILD
