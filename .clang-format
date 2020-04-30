@@ -1,0 +1,12 @@
+BasedOnStyle: WebKit
+Language: Cpp
+
+IndentWidth: 4
+AccessModifierOffset: -4
+UseTab: Always
+TabWidth: 4
+
+# AlignAfterOpenBracket: AlwaysBreak
+# BreakBeforeBraces: Allman
+# BreakBeforeBinaryOperators: All
+# IncludeBlocks: Regroup
