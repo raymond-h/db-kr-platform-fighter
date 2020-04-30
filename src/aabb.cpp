@@ -1,13 +1,6 @@
 #include "aabb.hpp"
 
-AABB boxForEntity(Position& pos, CollisionBox& cbox)
-{
-	return {
-		pos.x - cbox.width / 2, pos.y - cbox.height / 2,
-		pos.x + cbox.width / 2, pos.y + cbox.height / 2 };
-}
-
-void calculateOverlap(AABB a, AABB b, coord_t& outX, coord_t& outY)
+void calculateOverlap(AABB a, AABB b, Fixed& outX, Fixed& outY)
 {
 	auto overlapX1 = std::max<Fixed>(a.right - b.left, 0);
 	auto overlapX2 = std::min<Fixed>(a.left - b.right, 0);

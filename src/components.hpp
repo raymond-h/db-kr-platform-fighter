@@ -1,7 +1,10 @@
 #ifndef __COMPONENTS_HPP__
 #define __COMPONENTS_HPP__
 
+#include <entt/entt.hpp>
+
 #include "fixed.hpp"
+#include "aabb.hpp"
 
 #define SNAPSHOT_COMPONENTS                     \
     PlayerControllable, Position, CollisionBox, \
@@ -58,5 +61,12 @@ struct Ground
 struct NetSynced
 {
 };
+
+inline AABB boxForEntity(Position& pos, CollisionBox& cbox)
+{
+	return {
+		pos.x - cbox.width / 2, pos.y - cbox.height / 2,
+		pos.x + cbox.width / 2, pos.y + cbox.height / 2 };
+}
 
 #endif // __COMPONENTS_HPP__
