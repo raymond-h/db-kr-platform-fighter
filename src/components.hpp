@@ -1,75 +1,13 @@
 #ifndef __COMPONENTS_HPP__
 #define __COMPONENTS_HPP__
 
-#include <iostream>
 #include <entt/entt.hpp>
 
 #include "fixed.hpp"
 #include "aabb.hpp"
+#include "fighter_state.hpp"
 
 typedef Fixed coord_t;
-
-enum class FighterStateEnum
-{
-	Idle,
-	Walking,
-	Dashing,
-	Jumping,
-	Falling,
-	Jab,
-	DashAttack,
-	ForwardTilt,
-	ForwardSmashCharge,
-	ForwardSmashRelease
-};
-
-#define FSE_STR(s)            \
-	case FighterStateEnum::s: \
-		os << #s;             \
-		break;
-
-std::ostream &operator<<(std::ostream &os, const FighterStateEnum &fse)
-{
-	switch (fse)
-	{
-		FSE_STR(Idle)
-		FSE_STR(Walking)
-		FSE_STR(Dashing)
-		FSE_STR(Jumping)
-		FSE_STR(Falling)
-		FSE_STR(Jab)
-		FSE_STR(DashAttack)
-		FSE_STR(ForwardTilt)
-		FSE_STR(ForwardSmashCharge)
-		FSE_STR(ForwardSmashRelease)
-	}
-	return os;
-}
-
-bool isGroundMoving(FighterStateEnum fse)
-{
-	return fse == FighterStateEnum::Walking || fse == FighterStateEnum::Dashing;
-}
-
-bool isGrounded(FighterStateEnum fse)
-{
-	return fse == FighterStateEnum::Idle || isGroundMoving(fse);
-}
-
-bool isAirborne(FighterStateEnum fse)
-{
-	return fse == FighterStateEnum::Jumping || fse == FighterStateEnum::Falling;
-}
-
-bool isJumpable(FighterStateEnum fse)
-{
-	return isGrounded(fse);
-}
-
-bool isChargingSmashAttack(FighterStateEnum fse)
-{
-	return fse == FighterStateEnum::ForwardSmashCharge;
-}
 
 struct PlayerControllable
 {
@@ -80,6 +18,27 @@ struct FighterState
 {
 	FighterStateEnum fighterState;
 	int64_t currentStateFrameCounter;
+};
+
+const int16_t DEADZONE = 3300;
+const int16_t STRONG_POS_LIMIT = 25000;
+
+struct FighterInput
+{
+	int16_t moveX, moveY;
+	bool isStrong;
+	bool doJump;
+	bool doNormalAttack;
+
+	bool isMoveStickNeutral() const
+	{
+		return (moveX * moveX) + (moveY * moveY) <= (DEADZONE * DEADZONE);
+	}
+
+	bool isHoldingDirection() const
+	{
+		return abs(moveX) >= DEADZONE;
+	}
 };
 
 struct Position
