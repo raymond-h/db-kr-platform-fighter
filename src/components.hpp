@@ -15,7 +15,12 @@ enum class FighterStateEnum
 	Walking,
 	Dashing,
 	Jumping,
-	Falling
+	Falling,
+	Jab,
+	DashAttack,
+	ForwardTilt,
+	ForwardSmashCharge,
+	ForwardSmashRelease
 };
 
 #define FSE_STR(s)            \
@@ -32,6 +37,11 @@ std::ostream &operator<<(std::ostream &os, const FighterStateEnum &fse)
 		FSE_STR(Dashing)
 		FSE_STR(Jumping)
 		FSE_STR(Falling)
+		FSE_STR(Jab)
+		FSE_STR(DashAttack)
+		FSE_STR(ForwardTilt)
+		FSE_STR(ForwardSmashCharge)
+		FSE_STR(ForwardSmashRelease)
 	}
 	return os;
 }
@@ -56,8 +66,14 @@ bool isJumpable(FighterStateEnum fse)
 	return isGrounded(fse);
 }
 
+bool isChargingSmashAttack(FighterStateEnum fse)
+{
+	return fse == FighterStateEnum::ForwardSmashCharge;
+}
+
 struct PlayerControllable
 {
+	int16_t playerIndex;
 };
 
 struct FighterState

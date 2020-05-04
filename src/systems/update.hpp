@@ -8,7 +8,7 @@
 #include "reset_collision_flags.hpp"
 #include "collision_update.hpp"
 
-inline void update(const InputData &inputData, entt::registry &registry)
+inline void update(const CompleteInputData &inputData, entt::registry &registry)
 {
 	inputUpdate(inputData, registry);
 	positionUpdate(registry);

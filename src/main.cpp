@@ -35,12 +35,20 @@ bool handleEvent(InputData &inputData, SDL_Event &event)
 		{
 			inputData.doJump = true;
 		}
+		else if (event.cbutton.button == SDL_CONTROLLER_BUTTON_A)
+		{
+			inputData.doNormalAttack = true;
+		}
 		break;
 
 	case SDL_CONTROLLERBUTTONUP:
 		if (event.cbutton.button == SDL_CONTROLLER_BUTTON_X)
 		{
 			inputData.doJump = false;
+		}
+		else if (event.cbutton.button == SDL_CONTROLLER_BUTTON_A)
+		{
+			inputData.doNormalAttack = false;
 		}
 		break;
 
@@ -145,14 +153,14 @@ int main_game(int argc, char *argv[])
 		}
 	}
 
-	InputData inputData{0, 0, 0, 0, false};
-	int16_t lastMoveX = 0, lastMoveY = 0;
+	CompleteInputData completeInputData{
+		{0, 0, false, false, 0, 0}};
 
 	createGround(registry, 120, 300, 60, 150);
 	createGround(registry, 520, 300, 60, 150);
 	createGround(registry, 320, 240 + 120, 400, 60);
 
-	createPlayer(registry, 320, 240, 16, 16);
+	createPlayer(registry, 0, 320, 240, 16, 16);
 
 	const int frameLength = 1000 / 60;
 
@@ -160,22 +168,26 @@ int main_game(int argc, char *argv[])
 	int64_t frameCounter = 0;
 	while (true)
 	{
+		registry.set<int64_t>(frameCounter);
+
 		int frameStartMs = SDL_GetTicks();
 
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			done = handleEvent(inputData, event);
+			done = handleEvent(completeInputData.inputDatas[0], event);
 			if (done)
 				break;
 		}
 		if (done)
 			break;
 
-		inputData.moveVelX = inputData.moveX - lastMoveX;
-		inputData.moveVelY = inputData.moveY - lastMoveY;
+		for (auto &&id : completeInputData.inputDatas)
+		{
+			id.updateFrameCounters(frameCounter);
+		}
 
-		update(inputData, registry);
+		update(completeInputData, registry);
 
 		render(renderer, registry);
 
@@ -183,8 +195,6 @@ int main_game(int argc, char *argv[])
 
 		SDL_Delay(max(0, frameLength - (frameEndMs - frameStartMs)));
 		++frameCounter;
-		lastMoveX = inputData.moveX;
-		lastMoveY = inputData.moveY;
 	}
 
 	SDL_Quit();
