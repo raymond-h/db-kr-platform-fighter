@@ -12,58 +12,83 @@
 
 using namespace std;
 
-bool handleEvent(int32_t &moveX, int32_t &moveY, SDL_Event &event)
+bool handleEvent(InputData &inputData, SDL_Event &event)
 {
 	switch (event.type)
 	{
 	case SDL_QUIT:
 		return true;
 
-	case SDL_KEYDOWN:
-	{
-		if (event.key.repeat)
-			break;
-
-		switch (event.key.keysym.scancode)
+	case SDL_CONTROLLERAXISMOTION:
+		if (event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX)
 		{
-		case SDL_SCANCODE_LEFT:
-			moveX--;
-			break;
-		case SDL_SCANCODE_RIGHT:
-			moveX++;
-			break;
-		case SDL_SCANCODE_UP:
-			moveY--;
-			break;
-		case SDL_SCANCODE_DOWN:
-			moveY++;
-			break;
+			inputData.moveX = event.caxis.value;
+		}
+		else if (event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY)
+		{
+			inputData.moveY = event.caxis.value;
 		}
 		break;
-	}
 
-	case SDL_KEYUP:
-	{
-		if (event.key.repeat)
-			break;
-
-		switch (event.key.keysym.scancode)
+	case SDL_CONTROLLERBUTTONDOWN:
+		if (event.cbutton.button == SDL_CONTROLLER_BUTTON_X)
 		{
-		case SDL_SCANCODE_LEFT:
-			moveX++;
-			break;
-		case SDL_SCANCODE_RIGHT:
-			moveX--;
-			break;
-		case SDL_SCANCODE_UP:
-			moveY++;
-			break;
-		case SDL_SCANCODE_DOWN:
-			moveY--;
-			break;
+			inputData.doJump = true;
 		}
 		break;
-	}
+
+	case SDL_CONTROLLERBUTTONUP:
+		if (event.cbutton.button == SDL_CONTROLLER_BUTTON_X)
+		{
+			inputData.doJump = false;
+		}
+		break;
+
+		// case SDL_KEYDOWN:
+		// {
+		// 	if (event.key.repeat)
+		// 		break;
+
+		// 	switch (event.key.keysym.scancode)
+		// 	{
+		// 	case SDL_SCANCODE_LEFT:
+		// 		inputData.moveX -= 1;
+		// 		break;
+		// 	case SDL_SCANCODE_RIGHT:
+		// 		inputData.moveX += 1;
+		// 		break;
+		// 	case SDL_SCANCODE_UP:
+		// 		inputData.moveY -= 1;
+		// 		break;
+		// 	case SDL_SCANCODE_DOWN:
+		// 		inputData.moveY += 1;
+		// 		break;
+		// 	}
+		// 	break;
+		// }
+
+		// case SDL_KEYUP:
+		// {
+		// 	if (event.key.repeat)
+		// 		break;
+
+		// 	switch (event.key.keysym.scancode)
+		// 	{
+		// 	case SDL_SCANCODE_LEFT:
+		// 		inputData.moveX += 1;
+		// 		break;
+		// 	case SDL_SCANCODE_RIGHT:
+		// 		inputData.moveX -= 1;
+		// 		break;
+		// 	case SDL_SCANCODE_UP:
+		// 		inputData.moveY += 1;
+		// 		break;
+		// 	case SDL_SCANCODE_DOWN:
+		// 		inputData.moveY -= 1;
+		// 		break;
+		// 	}
+		// 	break;
+		// }
 
 	default:
 		break;
@@ -76,7 +101,7 @@ int main_game(int argc, char *argv[])
 {
 	entt::registry registry;
 
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 
 	shared_ptr<SDL_Window> window(
 		SDL_CreateWindow(
@@ -106,7 +131,22 @@ int main_game(int argc, char *argv[])
 		return 1;
 	}
 
-	int32_t moveX = 0, moveY = 0;
+	cout << "Joystick count: " << SDL_NumJoysticks() << endl;
+	for (int i = 0; i < SDL_NumJoysticks(); ++i)
+	{
+		if (SDL_IsGameController(i))
+		{
+			cout << "Index \'" << i << "\' is a compatible controller, named \'" << SDL_GameControllerNameForIndex(i) << "\'" << endl;
+			auto ctrl = SDL_GameControllerOpen(i);
+		}
+		else
+		{
+			cout << "Index \'" << i << "\' is not a compatible controller." << endl;
+		}
+	}
+
+	InputData inputData{0, 0, 0, 0, false};
+	int16_t lastMoveX = 0, lastMoveY = 0;
 
 	createGround(registry, 120, 300, 60, 150);
 	createGround(registry, 520, 300, 60, 150);
@@ -117,6 +157,7 @@ int main_game(int argc, char *argv[])
 	const int frameLength = 1000 / 60;
 
 	bool done = false;
+	int64_t frameCounter = 0;
 	while (true)
 	{
 		int frameStartMs = SDL_GetTicks();
@@ -124,20 +165,26 @@ int main_game(int argc, char *argv[])
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			done = handleEvent(moveX, moveY, event);
+			done = handleEvent(inputData, event);
 			if (done)
 				break;
 		}
 		if (done)
 			break;
 
-		update(moveX, moveY, registry);
+		inputData.moveVelX = inputData.moveX - lastMoveX;
+		inputData.moveVelY = inputData.moveY - lastMoveY;
+
+		update(inputData, registry);
 
 		render(renderer, registry);
 
 		int frameEndMs = SDL_GetTicks();
 
 		SDL_Delay(max(0, frameLength - (frameEndMs - frameStartMs)));
+		++frameCounter;
+		lastMoveX = inputData.moveX;
+		lastMoveY = inputData.moveY;
 	}
 
 	SDL_Quit();

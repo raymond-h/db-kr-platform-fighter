@@ -8,9 +8,9 @@
 #include "reset_collision_flags.hpp"
 #include "collision_update.hpp"
 
-inline void update(coord_t moveX, coord_t moveY, entt::registry &registry)
+inline void update(const InputData &inputData, entt::registry &registry)
 {
-	inputUpdate(moveX, moveY, registry);
+	inputUpdate(inputData, registry);
 	positionUpdate(registry);
 	resetCollisionFlags(registry);
 	collisionUpdate(registry);

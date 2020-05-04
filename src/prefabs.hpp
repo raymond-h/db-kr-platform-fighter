@@ -7,6 +7,7 @@ inline auto createPlayer(entt::registry &registry, coord_t x, coord_t y, coord_t
 {
     auto playerEntity = registry.create();
     registry.emplace<PlayerControllable>(playerEntity);
+    registry.emplace<FighterState>(playerEntity, FighterStateEnum::Idle, 0);
     registry.emplace<Position>(playerEntity, x, y);
     registry.emplace<CollisionBox>(playerEntity, w, h);
     registry.emplace<Velocity>(playerEntity, 0, 0);
