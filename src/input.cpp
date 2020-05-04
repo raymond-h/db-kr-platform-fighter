@@ -6,6 +6,7 @@ std::ostream &operator<<(std::ostream &os, const InputData &inputData)
        << "; moveY: " << inputData.moveY
        << "; doJump: " << inputData.doJump
        << "; doNormalAttack: " << inputData.doNormalAttack
+       << "; isStrongDirectional(): " << inputData.isStrongDirectional()
        << "; }";
     return os;
 }

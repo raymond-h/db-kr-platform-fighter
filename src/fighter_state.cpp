@@ -19,6 +19,10 @@ std::ostream &operator<<(std::ostream &os, const FighterStateEnum &fse)
         FSE_STR(ForwardTilt)
         FSE_STR(ForwardSmashCharge)
         FSE_STR(ForwardSmashRelease)
+        FSE_STR(UpSmashCharge)
+        FSE_STR(UpSmashRelease)
+        FSE_STR(DownSmashCharge)
+        FSE_STR(DownSmashRelease)
     }
     return os;
 }

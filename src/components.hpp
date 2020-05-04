@@ -6,6 +6,7 @@
 #include "fixed.hpp"
 #include "aabb.hpp"
 #include "fighter_state.hpp"
+#include "approx_math.hpp"
 
 typedef Fixed coord_t;
 
@@ -35,9 +36,23 @@ struct FighterInput
 		return (moveX * moveX) + (moveY * moveY) <= (DEADZONE * DEADZONE);
 	}
 
-	bool isHoldingDirection() const
+	bool isHoldingXDirection() const
 	{
-		return abs(moveX) >= DEADZONE;
+		const auto angle = moveAngle<4>();
+		return !isMoveStickNeutral() && (angle == 0 || angle == 2);
+	}
+
+	bool isHoldingYDirection() const
+	{
+		const auto angle = moveAngle<4>();
+		return !isMoveStickNeutral() && (angle == 1 || angle == 3);
+	}
+
+	template <int32_t ANGLE_COUNT>
+	int32_t moveAngle() const
+	{
+		const int32_t angle = fxpt_atan2(moveY, moveX) * (ANGLE_COUNT * 2) / 65535;
+		return ((angle + 1) / 2) % ANGLE_COUNT;
 	}
 };
 

@@ -13,6 +13,7 @@ struct InputData
 
     int64_t currentFrame;
     int64_t lastStickNeutralFrame;
+    int64_t lastStickExtremeFrame;
 
     void updateFrameCounters(int64_t frameCounter)
     {
@@ -21,6 +22,10 @@ struct InputData
         {
             lastStickNeutralFrame = frameCounter;
         }
+        else if (isMoveStickExtreme())
+        {
+            lastStickExtremeFrame = frameCounter;
+        }
     }
 
     bool isMoveStickNeutral() const
@@ -28,10 +33,15 @@ struct InputData
         return (moveX * moveX) + (moveY * moveY) <= (DEADZONE * DEADZONE);
     }
 
+    bool isMoveStickExtreme() const
+    {
+        return (moveX * moveX) + (moveY * moveY) > (STRONG_POS_LIMIT * STRONG_POS_LIMIT);
+    }
+
     bool isStrongDirectional() const
     {
-        const auto isPastStrongLimit = (moveX * moveX) + (moveY * moveY) > (STRONG_POS_LIMIT * STRONG_POS_LIMIT);
-        return isPastStrongLimit && (currentFrame - lastStickNeutralFrame) <= 4;
+        return (lastStickExtremeFrame - lastStickNeutralFrame) <= 4 &&
+               (currentFrame - lastStickExtremeFrame) <= 3;
     }
 };
 

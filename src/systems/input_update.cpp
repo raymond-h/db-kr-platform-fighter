@@ -16,14 +16,18 @@ FighterStateEnum computeNextState(
     const GroundCollisionFlags &gColFlags)
 {
     const FighterStateEnum &state = fs.fighterState;
-    const auto isHoldingDir = fighterInput.isHoldingDirection();
+    const auto isHoldingXDir = fighterInput.isHoldingXDirection();
+    const auto isHoldingYDir = fighterInput.isHoldingYDirection();
     const auto isStrong = fighterInput.isStrong;
+
+    const auto isUp = isHoldingYDir && fighterInput.moveY < 0;
+    const auto isDown = isHoldingYDir && fighterInput.moveY > 0;
 
     if (isAirborne(state))
     {
         if (gColFlags.bottom)
         {
-            return isHoldingDir ? FighterStateEnum::Walking : FighterStateEnum::Idle;
+            return isHoldingXDir ? FighterStateEnum::Walking : FighterStateEnum::Idle;
         }
         else if (vel.y > 0)
         {
@@ -36,7 +40,15 @@ FighterStateEnum computeNextState(
         {
             return FighterStateEnum::Jumping;
         }
-        else if (isHoldingDir && isStrong)
+        else if (isUp && isStrong && fighterInput.doNormalAttack)
+        {
+            return FighterStateEnum::UpSmashCharge;
+        }
+        else if (isDown && isStrong && fighterInput.doNormalAttack)
+        {
+            return FighterStateEnum::DownSmashCharge;
+        }
+        else if (isHoldingXDir && isStrong)
         {
             if (fighterInput.doNormalAttack)
             {
@@ -47,7 +59,7 @@ FighterStateEnum computeNextState(
                 return FighterStateEnum::Dashing;
             }
         }
-        else if (isHoldingDir)
+        else if (isHoldingXDir)
         {
             if (fighterInput.doNormalAttack)
             {
@@ -77,7 +89,7 @@ FighterStateEnum computeNextState(
         {
             return FighterStateEnum::DashAttack;
         }
-        else if (!isHoldingDir)
+        else if (!isHoldingXDir)
         {
             return FighterStateEnum::Idle;
         }
@@ -104,6 +116,30 @@ FighterStateEnum computeNextState(
         }
     }
     else if (state == FighterStateEnum::ForwardSmashRelease && fs.currentStateFrameCounter >= 40)
+    {
+        return FighterStateEnum::Idle;
+    }
+    // upsmash
+    else if (state == FighterStateEnum::UpSmashCharge)
+    {
+        if (!fighterInput.doNormalAttack || fs.currentStateFrameCounter >= 150)
+        {
+            return FighterStateEnum::UpSmashRelease;
+        }
+    }
+    else if (state == FighterStateEnum::UpSmashRelease && fs.currentStateFrameCounter >= 40)
+    {
+        return FighterStateEnum::Idle;
+    }
+    // downsmash
+    else if (state == FighterStateEnum::DownSmashCharge)
+    {
+        if (!fighterInput.doNormalAttack || fs.currentStateFrameCounter >= 150)
+        {
+            return FighterStateEnum::DownSmashRelease;
+        }
+    }
+    else if (state == FighterStateEnum::DownSmashRelease && fs.currentStateFrameCounter >= 40)
     {
         return FighterStateEnum::Idle;
     }
@@ -136,8 +172,8 @@ FighterStateEnum computeNextStateEarlyCancel(
 
 void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel)
 {
-    const auto isHoldingDir = fighterInput.isHoldingDirection();
-    const auto moveX = !isHoldingDir ? 0 : Fixed(fighterInput.moveX) / 32768;
+    const auto isHoldingXDir = fighterInput.isHoldingXDirection();
+    const auto moveX = !isHoldingXDir ? 0 : Fixed(fighterInput.moveX) / 32768;
 
     if (fs.fighterState == FighterStateEnum::Idle || isChargingSmashAttack(fs.fighterState))
     {

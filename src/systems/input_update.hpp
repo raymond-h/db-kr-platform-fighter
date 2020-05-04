@@ -9,16 +9,16 @@
 void assignFighterInputs(const InputData &inputData, FighterInput &fi);
 
 FighterStateEnum computeNextState(
-    const FighterState &fs,
-    const FighterInput &fighterInput,
-    const Velocity &vel,
-    const GroundCollisionFlags &gColFlags);
+	const FighterState &fs,
+	const FighterInput &fighterInput,
+	const Velocity &vel,
+	const GroundCollisionFlags &gColFlags);
 
 FighterStateEnum computeNextStateEarlyCancel(
-    const FighterState &fs,
-    const FighterInput &fighterInput,
-    const Velocity &vel,
-    const GroundCollisionFlags &gColFlags);
+	const FighterState &fs,
+	const FighterInput &fighterInput,
+	const Velocity &vel,
+	const GroundCollisionFlags &gColFlags);
 
 void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel);
 
@@ -29,6 +29,7 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 	registry.view<PlayerControllable, FighterInput>().each([&completeInputData](auto &pCon, auto &fi) {
 		const auto inputData = completeInputData.inputDatas[pCon.playerIndex];
 		assignFighterInputs(inputData, fi);
+		// std::cout << "[" << frameCounter << "] Player #" << (pCon.playerIndex) << " inputs: " << inputData << std::endl;
 	});
 
 	auto players = registry.view<FighterState, FighterInput, Velocity, GroundCollisionFlags>();
@@ -48,7 +49,8 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 			fs.currentStateFrameCounter++;
 		}
 
-		std::cout << "[" << frameCounter << "] " << fs.fighterState << std::endl;
+		std::cout << "[" << frameCounter << "] " << fs.fighterState << "; " << fi.isStrong << std::endl;
+		// std::cout << "[" << frameCounter << "] " << fi.moveAngle<4>() << std::endl;
 
 		// update vel from state
 		updateChara(fs, fi, vel);

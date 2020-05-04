@@ -14,7 +14,11 @@ enum class FighterStateEnum
     DashAttack,
     ForwardTilt,
     ForwardSmashCharge,
-    ForwardSmashRelease
+    ForwardSmashRelease,
+    UpSmashCharge,
+    UpSmashRelease,
+    DownSmashCharge,
+    DownSmashRelease
 };
 
 std::ostream &operator<<(std::ostream &os, const FighterStateEnum &fse);
@@ -41,7 +45,9 @@ inline bool constexpr isJumpable(FighterStateEnum fse)
 
 inline bool constexpr isChargingSmashAttack(FighterStateEnum fse)
 {
-    return fse == FighterStateEnum::ForwardSmashCharge;
+    return fse == FighterStateEnum::ForwardSmashCharge ||
+           fse == FighterStateEnum::UpSmashCharge ||
+           fse == FighterStateEnum::DownSmashCharge;
 }
 
 #endif // __FIGHTER_STATE_HPP__
