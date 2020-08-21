@@ -13,7 +13,7 @@ inline void positionUpdate(entt::registry &registry)
 			vel.y = 0;
 		}
 
-		vel.y += Fixed(1) / 10;
+		vel.y += Fixed(1) / 5;
 
 		pos.x += vel.x;
 		pos.y += vel.y;

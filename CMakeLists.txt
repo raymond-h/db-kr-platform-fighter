@@ -48,7 +48,7 @@ find_path(ENTT_INCLUDE_PATH entt/entt.hpp
 # setup sdl2 dependency
 find_package(SDL2 CONFIG REQUIRED)
 
-file(GLOB SOURCES "src/*.cpp" "src/*.c")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
 # add the executable
 add_executable(DbKrPlatformFighter ${SOURCES})

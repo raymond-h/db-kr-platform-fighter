@@ -3,20 +3,57 @@
 
 #include <entt/entt.hpp>
 
-#include "components.hpp"
+#include "../components.hpp"
+#include "../input.hpp"
 
-inline void inputUpdate(coord_t moveX, coord_t moveY, entt::registry &registry)
+void assignFighterInputs(const InputData &inputData, FighterInput &fi);
+
+FighterStateEnum computeNextState(
+	const FighterState &fs,
+	const FighterInput &fighterInput,
+	const Velocity &vel,
+	const GroundCollisionFlags &gColFlags);
+
+FighterStateEnum computeNextStateEarlyCancel(
+	const FighterState &fs,
+	const FighterInput &fighterInput,
+	const Velocity &vel,
+	const GroundCollisionFlags &gColFlags);
+
+void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel);
+
+inline void inputUpdate(const CompleteInputData &completeInputData, entt::registry &registry)
 {
-	auto players = registry.view<PlayerControllable, Velocity, GroundCollisionFlags>();
+	const auto frameCounter = registry.ctx<int64_t>();
+
+	registry.view<PlayerControllable, FighterInput>().each([&completeInputData](auto &pCon, auto &fi) {
+		const auto inputData = completeInputData.inputDatas[pCon.playerIndex];
+		assignFighterInputs(inputData, fi);
+		// std::cout << "[" << frameCounter << "] Player #" << (pCon.playerIndex) << " inputs: " << inputData << std::endl;
+	});
+
+	auto players = registry.view<FighterState, FighterInput, Velocity, GroundCollisionFlags>();
 	for (auto &entity : players)
 	{
-		auto [vel, gColFlags] = registry.get<Velocity, GroundCollisionFlags>(entity);
+		auto [fs, fi, vel, gColFlags] = registry.get<FighterState, FighterInput, Velocity, GroundCollisionFlags>(entity);
 
-		vel.x = moveX * 5 / 2;
-		if (gColFlags.bottom && moveY < 0)
+		auto nextState = computeNextStateEarlyCancel(fs, fi, vel, gColFlags);
+
+		if (nextState != fs.fighterState)
 		{
-			vel.y = -5;
+			fs.fighterState = nextState;
+			fs.currentStateFrameCounter = 0;
 		}
+		else
+		{
+			fs.currentStateFrameCounter++;
+		}
+
+		std::cout << "[" << frameCounter << "] " << fs.fighterState << "; " << fi.isStrong << std::endl;
+		// std::cout << "[" << frameCounter << "] " << fi.moveAngle<4>() << std::endl;
+
+		// update vel from state
+		updateChara(fs, fi, vel);
 	}
 }
 

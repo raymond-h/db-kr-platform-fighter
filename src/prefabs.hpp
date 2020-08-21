@@ -3,10 +3,12 @@
 
 #include "components.hpp"
 
-inline auto createPlayer(entt::registry &registry, coord_t x, coord_t y, coord_t w, coord_t h)
+inline auto createPlayer(entt::registry &registry, int16_t playerIndex, coord_t x, coord_t y, coord_t w, coord_t h)
 {
     auto playerEntity = registry.create();
-    registry.emplace<PlayerControllable>(playerEntity);
+    registry.emplace<PlayerControllable>(playerEntity, playerIndex);
+    registry.emplace<FighterState>(playerEntity, FighterStateEnum::Idle, 0);
+    registry.emplace<FighterInput>(playerEntity, (int16_t)0, (int16_t)0, false, false, false);
     registry.emplace<Position>(playerEntity, x, y);
     registry.emplace<CollisionBox>(playerEntity, w, h);
     registry.emplace<Velocity>(playerEntity, 0, 0);
