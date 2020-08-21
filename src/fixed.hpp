@@ -1,6 +1,7 @@
 #ifndef __FIXED_HPP__
 #define __FIXED_HPP__
 
+#include <cstdint>
 #include <boost/operators.hpp>
 
 int32_t fixed_mul_32(const int32_t &a, const int32_t &b);
