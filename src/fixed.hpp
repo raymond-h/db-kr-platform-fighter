@@ -65,6 +65,7 @@ public:
     }
 
     Fixed abs() const { return _value > 0 ? *this : from_raw(-_value); }
+    Fixed sign() const { return _value > 0 ? from_raw(ONE_VALUE) : -from_raw(ONE_VALUE); }
 
 private:
     int32_t _value;

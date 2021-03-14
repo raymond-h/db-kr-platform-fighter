@@ -91,3 +91,24 @@ TEST_CASE("literal -25.56", "[fixed]")
 
     REQUIRE(a == expected);
 }
+
+TEST_CASE("sign (positive)", "[fixed]")
+{
+    Fixed a = Fixed::from_raw(1024);
+
+    REQUIRE(a.sign() == 1);
+}
+
+TEST_CASE("sign (negative)", "[fixed]")
+{
+    Fixed a = Fixed::from_raw(-1024);
+
+    REQUIRE(a.sign() == -1);
+}
+
+TEST_CASE("sign * abs = identity", "[fixed]")
+{
+    Fixed a = Fixed::from_raw(-1024);
+
+    REQUIRE(a.sign() * a.abs() == a);
+}
