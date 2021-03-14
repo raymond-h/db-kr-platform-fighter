@@ -20,7 +20,7 @@ FighterStateEnum computeNextStateEarlyCancel(
 	const Velocity &vel,
 	const GroundCollisionFlags &gColFlags);
 
-void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel);
+void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel, facing_t &facing);
 
 inline void inputUpdate(const CompleteInputData &completeInputData, entt::registry &registry)
 {
@@ -49,11 +49,13 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 			fs.currentStateFrameCounter++;
 		}
 
-		std::cout << "[" << frameCounter << "] " << fs.fighterState << "; " << fi.isStrong << std::endl;
+		std::cout << "[" << frameCounter << "] " << fs.fighterState << "; " << fs.facing << "; " << fi.isStrong << std::endl;
 		// std::cout << "[" << frameCounter << "] " << fi.moveAngle<4>() << std::endl;
 
 		// update vel from state
-		updateChara(fs, fi, vel);
+		facing_t &facing = fs.facing;
+		updateChara(fs, fi, vel, facing);
+		fs.facing = facing;
 	}
 }
 

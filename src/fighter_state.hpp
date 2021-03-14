@@ -43,11 +43,22 @@ inline bool constexpr isJumpable(FighterStateEnum fse)
     return isGrounded(fse);
 }
 
-inline bool constexpr isChargingSmashAttack(FighterStateEnum fse)
+inline bool constexpr isAttackingStill(FighterStateEnum fse)
 {
-    return fse == FighterStateEnum::ForwardSmashCharge ||
+    return fse == FighterStateEnum::Jab ||
+           fse == FighterStateEnum::ForwardTilt ||
+           fse == FighterStateEnum::ForwardSmashCharge ||
+           fse == FighterStateEnum::ForwardSmashRelease ||
            fse == FighterStateEnum::UpSmashCharge ||
-           fse == FighterStateEnum::DownSmashCharge;
+           fse == FighterStateEnum::UpSmashRelease ||
+           fse == FighterStateEnum::DownSmashCharge ||
+           fse == FighterStateEnum::DownSmashRelease;
+}
+
+inline bool constexpr isAttacking(FighterStateEnum fse)
+{
+    return isAttackingStill(fse) ||
+           fse == FighterStateEnum::DashAttack;
 }
 
 #endif // __FIGHTER_STATE_HPP__

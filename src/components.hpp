@@ -9,6 +9,10 @@
 #include "approx_math.hpp"
 
 typedef Fixed coord_t;
+typedef int32_t facing_t;
+
+const facing_t FACING_RIGHT = 1;
+const facing_t FACING_LEFT = -1;
 
 struct PlayerControllable
 {
@@ -17,6 +21,8 @@ struct PlayerControllable
 
 struct FighterState
 {
+	facing_t facing;
+
 	FighterStateEnum fighterState;
 	int64_t currentStateFrameCounter;
 };

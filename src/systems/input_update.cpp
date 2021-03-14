@@ -170,23 +170,23 @@ FighterStateEnum computeNextStateEarlyCancel(
     }
 }
 
-void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel)
+void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel, facing_t &facing)
 {
     const auto isHoldingXDir = fighterInput.isHoldingXDirection();
     const auto moveX = !isHoldingXDir ? 0 : Fixed(fighterInput.moveX) / 32768;
 
-    if (fs.fighterState == FighterStateEnum::Idle || isChargingSmashAttack(fs.fighterState))
+    if (fs.fighterState == FighterStateEnum::Idle || isAttackingStill(fs.fighterState))
     {
         vel.x = 0;
     }
     else if (isGroundMoving(fs.fighterState))
     {
+        facing = moveX.sign().int_value();
         vel.x = fs.fighterState == FighterStateEnum::Dashing ? (moveX * 5) / 2 : (moveX * 5) / 4;
     }
     else if (fs.fighterState == FighterStateEnum::DashAttack)
     {
-        const auto dir = moveX > 0 ? 1 : -1;
-        vel.x = Fixed(8) / 2 * dir;
+        vel.x = Fixed(8) / 2 * fs.facing;
     }
     else if (isAirborne(fs.fighterState))
     {
