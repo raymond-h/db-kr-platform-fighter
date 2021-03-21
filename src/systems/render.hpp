@@ -5,48 +5,45 @@
 
 #include "components.hpp"
 
-inline void render(std::shared_ptr<SDL_Renderer> renderer, entt::registry &registry)
+inline void render(GPU_Target &screen, entt::registry &registry)
 {
-    SDL_Renderer *rendererP = renderer.get();
+    GPU_ClearRGBA(&screen, 0, 0, 0, 255);
 
-    SDL_SetRenderDrawColor(rendererP, 0, 0, 0, 255);
-    SDL_RenderClear(rendererP);
-
-    registry.view<Position, CollisionBox>().each([rendererP](Position &pos, CollisionBox &cbox) {
+    registry.view<Position, CollisionBox>().each([&screen](Position &pos, CollisionBox &cbox) {
         SDL_Rect rect;
         rect.x = int(pos.x - cbox.width / 2);
         rect.y = int(pos.y - cbox.height / 2);
         rect.w = int(cbox.width);
         rect.h = int(cbox.height);
-        SDL_SetRenderDrawColor(rendererP, 255, 0, 0, 255);
-        SDL_RenderFillRect(rendererP, &rect);
+        SDL_Color rectColor{255, 0, 0, 255};
+        GPU_RectangleFilled(&screen, float(rect.x), float(rect.y), float(rect.x + rect.w), float(rect.y + rect.h), rectColor);
     });
 
-    registry.view<Position, GroundCollisionFlags>().each([rendererP](Position &pos, GroundCollisionFlags &gcolflags) {
-        const int lineLen = 15;
+    registry.view<Position, GroundCollisionFlags>().each([&screen](Position &pos, GroundCollisionFlags &gcolflags) {
+        const float lineLen = 15.f;
 
-        int32_t x = (int32_t)pos.x, y = (int32_t)pos.y;
+        float x = (float)pos.x, y = (float)pos.y;
 
-        SDL_SetRenderDrawColor(rendererP, 0, 255, 0, 255);
+        SDL_Color lineColor{0, 255, 0, 255};
         if (gcolflags.left)
         {
-            SDL_RenderDrawLine(rendererP, x, y, x - lineLen, y);
+            GPU_Line(&screen, x, y, x - lineLen, y, lineColor);
         }
         if (gcolflags.right)
         {
-            SDL_RenderDrawLine(rendererP, x, y, x + lineLen, y);
+            GPU_Line(&screen, x, y, x + lineLen, y, lineColor);
         }
         if (gcolflags.top)
         {
-            SDL_RenderDrawLine(rendererP, x, y, x, y - lineLen);
+            GPU_Line(&screen, x, y, x, y - lineLen, lineColor);
         }
         if (gcolflags.bottom)
         {
-            SDL_RenderDrawLine(rendererP, x, y, x, y + lineLen);
+            GPU_Line(&screen, x, y, x, y + lineLen, lineColor);
         }
     });
 
-    SDL_RenderPresent(rendererP);
+    GPU_Flip(&screen);
 }
 
 #endif // __RENDER_HPP__

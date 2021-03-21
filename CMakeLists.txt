@@ -48,12 +48,15 @@ find_path(ENTT_INCLUDE_PATH entt/entt.hpp
 # setup sdl2 dependency
 find_package(SDL2 CONFIG REQUIRED)
 
+# setup sdl-gpu
+add_subdirectory("./dependencies/sdl-gpu")
+
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
 # add the executable
 add_executable(DbKrPlatformFighter ${SOURCES})
-target_include_directories(DbKrPlatformFighter PRIVATE ${ENTT_INCLUDE_PATH})
-target_link_libraries(DbKrPlatformFighter PRIVATE Boost::headers SDL2::SDL2 SDL2::SDL2main GGPO)
+target_include_directories(DbKrPlatformFighter PRIVATE ${SDL2_INCLUDE_DIR} ${ENTT_INCLUDE_PATH} ${SDL_gpu_SOURCE_DIR}/include)
+target_link_libraries(DbKrPlatformFighter PRIVATE Boost::headers GGPO SDL_gpu opengl32 glu32)
 
 add_custom_command(TARGET DbKrPlatformFighter
     POST_BUILD

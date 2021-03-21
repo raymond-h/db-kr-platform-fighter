@@ -2,6 +2,7 @@
 #include <ggponet.h>
 #include <entt/entt.hpp>
 #include <SDL.h>
+#include <SDL_gpu.h>
 
 #include "components.hpp"
 #include "prefabs.hpp"
@@ -109,35 +110,15 @@ int main_game(int argc, char *argv[])
 {
 	entt::registry registry;
 
-	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
-
-	shared_ptr<SDL_Window> window(
-		SDL_CreateWindow(
-			"DB KR Platform Fighter",
-			SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED,
-			640,
-			480,
-			0),
-		SDL_DestroyWindow);
-
-	if (window == nullptr)
+	auto screen = GPU_Init(640, 480, GPU_DEFAULT_INIT_FLAGS);
+	if (screen == nullptr)
 	{
-		printf("Could not create window: %s\n", SDL_GetError());
-		SDL_Quit();
+		auto code = GPU_PopErrorCode();
+		printf("Could not initialize SDL_gpu: %s: %s\n", GPU_GetErrorString(code.error), code.details);
 		return 1;
 	}
 
-	shared_ptr<SDL_Renderer> renderer(
-		SDL_CreateRenderer(window.get(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC), SDL_DestroyRenderer);
-
-	if (renderer == nullptr)
-	{
-		printf("Could not create renderer: %s\n", SDL_GetError());
-		window.reset();
-		SDL_Quit();
-		return 1;
-	}
+	SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
 
 	cout << "Joystick count: " << SDL_NumJoysticks() << endl;
 	for (int i = 0; i < SDL_NumJoysticks(); ++i)
@@ -189,7 +170,7 @@ int main_game(int argc, char *argv[])
 
 		update(completeInputData, registry);
 
-		render(renderer, registry);
+		render(*screen, registry);
 
 		int frameEndMs = SDL_GetTicks();
 
@@ -197,7 +178,7 @@ int main_game(int argc, char *argv[])
 		++frameCounter;
 	}
 
-	SDL_Quit();
+	GPU_Quit();
 
 	return 0;
 }
