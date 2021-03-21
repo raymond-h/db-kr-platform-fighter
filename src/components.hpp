@@ -9,6 +9,7 @@
 #include "approx_math.hpp"
 
 typedef Fixed coord_t;
+typedef int32_t window_t;
 typedef int32_t facing_t;
 
 const facing_t FACING_RIGHT = 1;
@@ -25,6 +26,9 @@ struct FighterState
 
 	FighterStateEnum fighterState;
 	int64_t currentStateFrameCounter;
+
+	window_t window;
+	int64_t currentWindowFrameCounter;
 };
 
 const int16_t DEADZONE = 3300;

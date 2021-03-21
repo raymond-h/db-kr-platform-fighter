@@ -13,12 +13,9 @@ enum class FighterStateEnum
     Jab,
     DashAttack,
     ForwardTilt,
-    ForwardSmashCharge,
-    ForwardSmashRelease,
-    UpSmashCharge,
-    UpSmashRelease,
-    DownSmashCharge,
-    DownSmashRelease
+    ForwardSmash,
+    UpSmash,
+    DownSmash
 };
 
 std::ostream &operator<<(std::ostream &os, const FighterStateEnum &fse);
@@ -47,12 +44,9 @@ inline bool constexpr isAttackingStill(FighterStateEnum fse)
 {
     return fse == FighterStateEnum::Jab ||
            fse == FighterStateEnum::ForwardTilt ||
-           fse == FighterStateEnum::ForwardSmashCharge ||
-           fse == FighterStateEnum::ForwardSmashRelease ||
-           fse == FighterStateEnum::UpSmashCharge ||
-           fse == FighterStateEnum::UpSmashRelease ||
-           fse == FighterStateEnum::DownSmashCharge ||
-           fse == FighterStateEnum::DownSmashRelease;
+           fse == FighterStateEnum::ForwardSmash ||
+           fse == FighterStateEnum::UpSmash ||
+           fse == FighterStateEnum::DownSmash;
 }
 
 inline bool constexpr isAttacking(FighterStateEnum fse)

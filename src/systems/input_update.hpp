@@ -1,6 +1,7 @@
 #ifndef __INPUT_UPDATE_HPP__
 #define __INPUT_UPDATE_HPP__
 
+#include <variant>
 #include <entt/entt.hpp>
 
 #include "../components.hpp"
@@ -14,13 +15,43 @@ FighterStateEnum computeNextState(
 	const Velocity &vel,
 	const GroundCollisionFlags &gColFlags);
 
+FighterStateEnum computeNextStateStandard(
+	const FighterState &fs,
+	const FighterInput &fighterInput,
+	const Velocity &vel,
+	const GroundCollisionFlags &gColFlags);
+
+FighterStateEnum computeNextStateAttackMove(
+	const FighterState &fs,
+	const FighterInput &fighterInput,
+	const Velocity &vel,
+	const GroundCollisionFlags &gColFlags);
+
 FighterStateEnum computeNextStateEarlyCancel(
 	const FighterState &fs,
 	const FighterInput &fighterInput,
 	const Velocity &vel,
 	const GroundCollisionFlags &gColFlags);
 
+struct WindowChange
+{
+	window_t nextWindow;
+};
+
+std::variant<WindowChange, FighterStateEnum> computeNextWindow(
+	const FighterState &fs,
+	const FighterInput &fighterInput);
+
 void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel, facing_t &facing);
+
+inline void setCurrentState(FighterState &fs, FighterStateEnum nextState)
+{
+	fs.fighterState = nextState;
+	fs.currentStateFrameCounter = 0;
+
+	fs.window = 0;
+	fs.currentWindowFrameCounter = 0;
+}
 
 inline void inputUpdate(const CompleteInputData &completeInputData, entt::registry &registry)
 {
@@ -37,19 +68,40 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 	{
 		auto [fs, fi, vel, gColFlags] = registry.get<FighterState, FighterInput, Velocity, GroundCollisionFlags>(entity);
 
-		auto nextState = computeNextStateEarlyCancel(fs, fi, vel, gColFlags);
+		const auto nextState = computeNextState(fs, fi, vel, gColFlags);
 
 		if (nextState != fs.fighterState)
 		{
-			fs.fighterState = nextState;
-			fs.currentStateFrameCounter = 0;
+			setCurrentState(fs, nextState);
 		}
 		else
 		{
 			fs.currentStateFrameCounter++;
+
+			const auto nextWindowOrState = computeNextWindow(fs, fi);
+
+			if (std::holds_alternative<WindowChange>(nextWindowOrState))
+			{
+				const auto nextWindow = std::get<WindowChange>(nextWindowOrState).nextWindow;
+				if (fs.window != nextWindow)
+				{
+					fs.window = nextWindow;
+					fs.currentWindowFrameCounter = 0;
+				}
+				else
+				{
+					fs.currentWindowFrameCounter++;
+				}
+			}
+			else
+			{
+				const auto nextState = std::get<FighterStateEnum>(nextWindowOrState);
+				assert(nextState != fs.fighterState);
+				setCurrentState(fs, nextState);
+			}
 		}
 
-		std::cout << "[" << frameCounter << "] " << fs.fighterState << "; " << fs.facing << "; " << fi.isStrong << std::endl;
+		std::cout << "[" << frameCounter << "] " << fs.fighterState << "; " << fs.facing << "; " << fs.window << "; " << fi.isStrong << std::endl;
 		// std::cout << "[" << frameCounter << "] " << fi.moveAngle<4>() << std::endl;
 
 		// update vel from state
