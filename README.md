@@ -9,6 +9,8 @@
 - SDL2
 - GGPO
 - EnTT
+- SDL-gpu
+- ImGui
 
 ## Setting up
 
