@@ -18,6 +18,8 @@ using namespace std;
 
 bool handleEvent(InputData &inputData, bool &showDemoWindow, bool &showDebugWindow, SDL_Event &event)
 {
+	ImGuiIO &io = ImGui::GetIO();
+
 	switch (event.type)
 	{
 	case SDL_QUIT:
@@ -58,6 +60,9 @@ bool handleEvent(InputData &inputData, bool &showDemoWindow, bool &showDebugWind
 
 	case SDL_KEYDOWN:
 	{
+		if (io.WantCaptureKeyboard)
+			break;
+
 		if (event.key.repeat)
 			break;
 
