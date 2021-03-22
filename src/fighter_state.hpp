@@ -20,6 +20,8 @@ enum class FighterStateEnum
 
 std::ostream &operator<<(std::ostream &os, const FighterStateEnum &fse);
 
+const char* fighter_state_enum_to_string(const FighterStateEnum &fse);
+
 inline bool constexpr isGroundMoving(FighterStateEnum fse)
 {
     return fse == FighterStateEnum::Walking || fse == FighterStateEnum::Dashing;

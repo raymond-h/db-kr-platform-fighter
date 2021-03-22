@@ -51,12 +51,23 @@ find_package(SDL2 CONFIG REQUIRED)
 # setup sdl-gpu
 add_subdirectory("./dependencies/sdl-gpu")
 
+# setup imgui
+file(GLOB IMGUI_SOURCES "dependencies/imgui/*.cpp")
+add_library(ImGui OBJECT ${IMGUI_SOURCES})
+target_include_directories(ImGui PUBLIC "dependencies/imgui" "dependencies/imgui/backends")
+
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
 # add the executable
-add_executable(DbKrPlatformFighter ${SOURCES})
-target_include_directories(DbKrPlatformFighter PRIVATE ${SDL2_INCLUDE_DIR} ${ENTT_INCLUDE_PATH} ${SDL_gpu_SOURCE_DIR}/include)
-target_link_libraries(DbKrPlatformFighter PRIVATE Boost::headers GGPO SDL_gpu opengl32 glu32)
+add_executable(DbKrPlatformFighter ${SOURCES} "dependencies/imgui/backends/imgui_impl_sdl.cpp" "dependencies/imgui/backends/imgui_impl_opengl3.cpp")
+target_include_directories(DbKrPlatformFighter
+    PRIVATE
+        ${SDL2_INCLUDE_DIR}
+        ${ENTT_INCLUDE_PATH}
+        ${SDL_gpu_SOURCE_DIR}/include
+        "dependencies/sdl-gpu/src/externals/glew"
+)
+target_link_libraries(DbKrPlatformFighter PRIVATE Boost::headers GGPO ImGui SDL_gpu opengl32 glu32)
 
 add_custom_command(TARGET DbKrPlatformFighter
     POST_BUILD

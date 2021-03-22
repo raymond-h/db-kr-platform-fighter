@@ -3,6 +3,9 @@
 #include <entt/entt.hpp>
 #include <SDL.h>
 #include <SDL_gpu.h>
+#include <imgui.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_impl_opengl3.h>
 
 #include "components.hpp"
 #include "prefabs.hpp"
@@ -13,7 +16,7 @@
 
 using namespace std;
 
-bool handleEvent(InputData &inputData, SDL_Event &event)
+bool handleEvent(InputData &inputData, bool &showDemoWindow, bool &showDebugWindow, SDL_Event &event)
 {
 	switch (event.type)
 	{
@@ -53,28 +56,36 @@ bool handleEvent(InputData &inputData, SDL_Event &event)
 		}
 		break;
 
-		// case SDL_KEYDOWN:
-		// {
-		// 	if (event.key.repeat)
-		// 		break;
+	case SDL_KEYDOWN:
+	{
+		if (event.key.repeat)
+			break;
 
-		// 	switch (event.key.keysym.scancode)
-		// 	{
-		// 	case SDL_SCANCODE_LEFT:
-		// 		inputData.moveX -= 1;
-		// 		break;
-		// 	case SDL_SCANCODE_RIGHT:
-		// 		inputData.moveX += 1;
-		// 		break;
-		// 	case SDL_SCANCODE_UP:
-		// 		inputData.moveY -= 1;
-		// 		break;
-		// 	case SDL_SCANCODE_DOWN:
-		// 		inputData.moveY += 1;
-		// 		break;
-		// 	}
-		// 	break;
-		// }
+		switch (event.key.keysym.scancode)
+		{
+		case SDL_SCANCODE_F12:
+			showDebugWindow = !showDebugWindow;
+			break;
+
+		case SDL_SCANCODE_F11:
+			showDemoWindow = !showDemoWindow;
+			break;
+
+			// case SDL_SCANCODE_LEFT:
+			// 	inputData.moveX -= 1;
+			// 	break;
+			// case SDL_SCANCODE_RIGHT:
+			// 	inputData.moveX += 1;
+			// 	break;
+			// case SDL_SCANCODE_UP:
+			// 	inputData.moveY -= 1;
+			// 	break;
+			// case SDL_SCANCODE_DOWN:
+			// 	inputData.moveY += 1;
+			// 	break;
+		}
+		break;
+	}
 
 		// case SDL_KEYUP:
 		// {
@@ -106,9 +117,14 @@ bool handleEvent(InputData &inputData, SDL_Event &event)
 	return false;
 }
 
+const char *glsl_version = "#version 150";
+
 int main_game(int argc, char *argv[])
 {
 	entt::registry registry;
+
+	GPU_RendererID desiredGpuRendererId = GPU_GetRendererID(GPU_RENDERER_OPENGL_3);
+	GPU_SetRendererOrder(1, &desiredGpuRendererId);
 
 	auto screen = GPU_Init(640, 480, GPU_DEFAULT_INIT_FLAGS);
 	if (screen == nullptr)
@@ -119,6 +135,15 @@ int main_game(int argc, char *argv[])
 	}
 
 	SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+
+	ImGui::StyleColorsDark();
+
+	SDL_Window *window = SDL_GetWindowFromID(screen->context->windowID);
+	ImGui_ImplSDL2_InitForOpenGL(window, screen->context->context);
+	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	cout << "Joystick count: " << SDL_NumJoysticks() << endl;
 	for (int i = 0; i < SDL_NumJoysticks(); ++i)
@@ -145,6 +170,9 @@ int main_game(int argc, char *argv[])
 
 	const int frameLength = 1000 / 60;
 
+	bool showDemoWindow = false;
+	bool showDebugWindow = false;
+
 	bool done = false;
 	int64_t frameCounter = 0;
 	while (true)
@@ -156,7 +184,9 @@ int main_game(int argc, char *argv[])
 		SDL_Event event;
 		while (SDL_PollEvent(&event))
 		{
-			done = handleEvent(completeInputData.inputDatas[0], event);
+			ImGui_ImplSDL2_ProcessEvent(&event);
+
+			done = handleEvent(completeInputData.inputDatas[0], showDemoWindow, showDebugWindow, event);
 			if (done)
 				break;
 		}
@@ -168,6 +198,20 @@ int main_game(int argc, char *argv[])
 			id.updateFrameCounters(frameCounter);
 		}
 
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplSDL2_NewFrame(window);
+		ImGui::NewFrame();
+
+		if (showDemoWindow)
+		{
+			ImGui::ShowDemoWindow(&showDemoWindow);
+		}
+
+		if (showDebugWindow)
+		{
+			drawDebugWindow(registry);
+		}
+
 		update(completeInputData, registry);
 
 		render(*screen, registry);
@@ -177,6 +221,10 @@ int main_game(int argc, char *argv[])
 		SDL_Delay(max(0, frameLength - (frameEndMs - frameStartMs)));
 		++frameCounter;
 	}
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
 
 	GPU_Quit();
 

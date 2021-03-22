@@ -101,7 +101,7 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 			}
 		}
 
-		std::cout << "[" << frameCounter << "] " << fs.fighterState << "; " << fs.facing << "; " << fs.window << "; " << fi.isStrong << std::endl;
+		// std::cout << "[" << frameCounter << "] " << fs.fighterState << "; " << fs.facing << "; " << fs.window << "; " << fi.isStrong << std::endl;
 		// std::cout << "[" << frameCounter << "] " << fi.moveAngle<4>() << std::endl;
 
 		// update vel from state

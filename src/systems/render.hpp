@@ -2,11 +2,15 @@
 #define __RENDER_HPP__
 
 #include <entt/entt.hpp>
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
 
 #include "components.hpp"
 
 inline void render(GPU_Target &screen, entt::registry &registry)
 {
+    ImGui::Render();
+
     GPU_ClearRGBA(&screen, 0, 0, 0, 255);
 
     registry.view<Position, CollisionBox>().each([&screen](Position &pos, CollisionBox &cbox) {
@@ -42,6 +46,10 @@ inline void render(GPU_Target &screen, entt::registry &registry)
             GPU_Line(&screen, x, y, x, y + lineLen, lineColor);
         }
     });
+
+    GPU_FlushBlitBuffer();
+
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     GPU_Flip(&screen);
 }

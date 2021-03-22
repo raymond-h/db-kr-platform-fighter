@@ -2,10 +2,15 @@
 
 #define FSE_STR(s)            \
     case FighterStateEnum::s: \
-        os << #s;             \
-        break;
+        return #s;
 
 std::ostream &operator<<(std::ostream &os, const FighterStateEnum &fse)
+{
+    os << fighter_state_enum_to_string(fse);
+    return os;
+}
+
+const char *fighter_state_enum_to_string(const FighterStateEnum &fse)
 {
     switch (fse)
     {
@@ -21,5 +26,5 @@ std::ostream &operator<<(std::ostream &os, const FighterStateEnum &fse)
         FSE_STR(UpSmash)
         FSE_STR(DownSmash)
     }
-    return os;
+    return nullptr;
 }
