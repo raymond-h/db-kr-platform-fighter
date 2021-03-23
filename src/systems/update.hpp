@@ -3,10 +3,10 @@
 
 #include <entt/entt.hpp>
 
+#include "collision_update.hpp"
 #include "input_update.hpp"
 #include "position_update.hpp"
 #include "reset_collision_flags.hpp"
-#include "collision_update.hpp"
 
 inline void update(const CompleteInputData &inputData, entt::registry &registry)
 {
@@ -16,4 +16,4 @@ inline void update(const CompleteInputData &inputData, entt::registry &registry)
 	collisionUpdate(registry);
 }
 
-#endif // __UPDATE_HPP__
+#endif// __UPDATE_HPP__

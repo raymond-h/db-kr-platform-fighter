@@ -7,17 +7,19 @@
 
 inline void positionUpdate(entt::registry &registry)
 {
-	registry.view<Position, Velocity, GroundCollisionFlags>().each([](Position &pos, Velocity &vel, GroundCollisionFlags &gColFlags) {
-		if (gColFlags.bottom && vel.y > 0)
+	registry.view<Position, Velocity, GroundCollisionFlags>().each(
+		[](Position &pos, Velocity &vel, GroundCollisionFlags &gColFlags)
 		{
-			vel.y = 0;
-		}
+			if (gColFlags.bottom && vel.y > 0)
+			{
+				vel.y = 0;
+			}
 
-		vel.y += Fixed(1) / 5;
+			vel.y += Fixed(1) / 5;
 
-		pos.x += vel.x;
-		pos.y += vel.y;
-	});
+			pos.x += vel.x;
+			pos.y += vel.y;
+		});
 }
 
-#endif // __POSITION_UPDATE_HPP__
+#endif// __POSITION_UPDATE_HPP__

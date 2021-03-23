@@ -3,10 +3,10 @@
 
 #include <entt/entt.hpp>
 
-#include "fixed.hpp"
 #include "aabb.hpp"
-#include "fighter_state.hpp"
 #include "approx_math.hpp"
+#include "fighter_state.hpp"
+#include "fixed.hpp"
 
 typedef Fixed coord_t;
 typedef int32_t window_t;
@@ -100,4 +100,4 @@ inline AABB boxForEntity(Position &pos, CollisionBox &cbox)
 		pos.x + cbox.width / 2, pos.y + cbox.height / 2};
 }
 
-#endif // __COMPONENTS_HPP__
+#endif// __COMPONENTS_HPP__

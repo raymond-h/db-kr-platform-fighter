@@ -1,6 +1,6 @@
 #include "aabb.hpp"
 
-void calculateOverlap(AABB a, AABB b, Fixed& outX, Fixed& outY)
+void calculateOverlap(AABB a, AABB b, Fixed &outX, Fixed &outY)
 {
 	auto overlapX1 = std::max<Fixed>(a.right - b.left, 0);
 	auto overlapX2 = std::min<Fixed>(a.left - b.right, 0);

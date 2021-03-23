@@ -1,8 +1,8 @@
 #ifndef __INPUT_UPDATE_HPP__
 #define __INPUT_UPDATE_HPP__
 
-#include <variant>
 #include <entt/entt.hpp>
+#include <variant>
 
 #include "../components.hpp"
 #include "../input.hpp"
@@ -57,16 +57,17 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 {
 	const auto frameCounter = registry.ctx<int64_t>();
 
-	registry.view<PlayerControllable, FighterInput>().each([&completeInputData](auto &pCon, auto &fi) {
-		const auto inputData = completeInputData.inputDatas[pCon.playerIndex];
-		assignFighterInputs(inputData, fi);
-		// std::cout << "[" << frameCounter << "] Player #" << (pCon.playerIndex) << " inputs: " << inputData << std::endl;
-	});
+	registry.view<PlayerControllable, FighterInput>().each([&completeInputData](auto &pCon, auto &fi)
+	                                                       {
+		                                                       const auto inputData = completeInputData.inputDatas[pCon.playerIndex];
+		                                                       assignFighterInputs(inputData, fi);
+		                                                       // std::cout << "[" << frameCounter << "] Player #" << (pCon.playerIndex) << " inputs: " << inputData << std::endl;
+	                                                       });
 
 	auto players = registry.view<FighterState, FighterInput, Velocity, GroundCollisionFlags>();
 	for (auto &entity : players)
 	{
-		auto [fs, fi, vel, gColFlags] = registry.get<FighterState, FighterInput, Velocity, GroundCollisionFlags>(entity);
+		auto[fs, fi, vel, gColFlags] = registry.get<FighterState, FighterInput, Velocity, GroundCollisionFlags>(entity);
 
 		const auto nextState = computeNextState(fs, fi, vel, gColFlags);
 
@@ -111,4 +112,4 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 	}
 }
 
-#endif // __INPUT_UPDATE_HPP__
+#endif// __INPUT_UPDATE_HPP__

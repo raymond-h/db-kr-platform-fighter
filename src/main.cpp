@@ -1,16 +1,16 @@
-#include <iostream>
-#include <ggponet.h>
-#include <entt/entt.hpp>
 #include <SDL.h>
 #include <SDL_gpu.h>
+#include <entt/entt.hpp>
+#include <ggponet.h>
 #include <imgui.h>
-#include <imgui_impl_sdl.h>
 #include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl.h>
+#include <iostream>
 
-#include "components.hpp"
-#include "prefabs.hpp"
 #include "aabb.hpp"
+#include "components.hpp"
 #include "fixed.hpp"
+#include "prefabs.hpp"
 
 #include "systems/systems.hpp"
 
@@ -155,7 +155,8 @@ int main_game(int argc, char *argv[])
 	{
 		if (SDL_IsGameController(i))
 		{
-			cout << "Index \'" << i << "\' is a compatible controller, named \'" << SDL_GameControllerNameForIndex(i) << "\'" << endl;
+			cout << "Index \'" << i << "\' is a compatible controller, named \'" << SDL_GameControllerNameForIndex(i)
+			     << "\'" << endl;
 			auto ctrl = SDL_GameControllerOpen(i);
 		}
 		else

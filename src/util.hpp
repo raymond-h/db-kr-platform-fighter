@@ -22,4 +22,4 @@ void printRange(const Range &r)
 	printRange(std::begin(r), std::end(r));
 }
 
-#endif // __UTIL_HPP__
+#endif// __UTIL_HPP__
