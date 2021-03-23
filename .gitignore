@@ -1,6 +1,8 @@
 .vscode/
 build/
+cmake-build-debug/
 Testing/
 .vs/
+.idea/
 
 *.dll
