@@ -11,6 +11,6 @@ struct AABB
 	Fixed left, top, right, bottom;
 };
 
-void calculateOverlap(AABB a, AABB b, Fixed &outX, Fixed &outY);
+void calculateOverlap(const AABB &a, const AABB &b, Fixed &outX, Fixed &outY);
 
 #endif// __AABB_HPP__
