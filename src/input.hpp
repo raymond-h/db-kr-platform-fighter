@@ -41,7 +41,7 @@ struct InputData
 	bool isStrongDirectional() const
 	{
 		return (lastStickExtremeFrame - lastStickNeutralFrame) <= 4 &&
-		       (currentFrame - lastStickExtremeFrame) <= 3;
+			(currentFrame - lastStickExtremeFrame) <= 3;
 	}
 };
 

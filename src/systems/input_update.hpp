@@ -57,12 +57,14 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 {
 	const auto frameCounter = registry.ctx<int64_t>();
 
-	registry.view<PlayerControllable, FighterInput>().each([&completeInputData](auto &pCon, auto &fi)
-	                                                       {
-		                                                       const auto inputData = completeInputData.inputDatas[pCon.playerIndex];
-		                                                       assignFighterInputs(inputData, fi);
-		                                                       // std::cout << "[" << frameCounter << "] Player #" << (pCon.playerIndex) << " inputs: " << inputData << std::endl;
-	                                                       });
+	registry.view<PlayerControllable, FighterInput>().each(
+		[&completeInputData](auto &pCon, auto &fi)
+		{
+			const auto inputData = completeInputData.inputDatas[pCon.playerIndex];
+			assignFighterInputs(inputData, fi);
+			// std::cout << "[" << frameCounter << "] Player #" << (pCon.playerIndex) << " inputs: " << inputData << std::endl;
+		}
+	);
 
 	auto players = registry.view<FighterState, FighterInput, Velocity, GroundCollisionFlags>();
 	for (auto &entity : players)

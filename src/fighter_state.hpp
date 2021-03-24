@@ -45,16 +45,16 @@ inline bool constexpr isJumpable(FighterStateEnum fse)
 inline bool constexpr isAttackingStill(FighterStateEnum fse)
 {
 	return fse == FighterStateEnum::Jab ||
-	       fse == FighterStateEnum::ForwardTilt ||
-	       fse == FighterStateEnum::ForwardSmash ||
-	       fse == FighterStateEnum::UpSmash ||
-	       fse == FighterStateEnum::DownSmash;
+		fse == FighterStateEnum::ForwardTilt ||
+		fse == FighterStateEnum::ForwardSmash ||
+		fse == FighterStateEnum::UpSmash ||
+		fse == FighterStateEnum::DownSmash;
 }
 
 inline bool constexpr isAttacking(FighterStateEnum fse)
 {
 	return isAttackingStill(fse) ||
-	       fse == FighterStateEnum::DashAttack;
+		fse == FighterStateEnum::DashAttack;
 }
 
 #endif// __FIGHTER_STATE_HPP__

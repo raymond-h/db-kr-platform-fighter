@@ -19,7 +19,8 @@ inline void positionUpdate(entt::registry &registry)
 
 			pos.x += vel.x;
 			pos.y += vel.y;
-		});
+		}
+	);
 }
 
 #endif// __POSITION_UPDATE_HPP__

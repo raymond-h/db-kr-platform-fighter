@@ -156,7 +156,7 @@ int main_game(int argc, char *argv[])
 		if (SDL_IsGameController(i))
 		{
 			cout << "Index \'" << i << "\' is a compatible controller, named \'" << SDL_GameControllerNameForIndex(i)
-			     << "\'" << endl;
+				<< "\'" << endl;
 			auto ctrl = SDL_GameControllerOpen(i);
 		}
 		else
