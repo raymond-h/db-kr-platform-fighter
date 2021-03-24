@@ -5,21 +5,19 @@
 
 #include "components.hpp"
 
-inline void handleGroundCollision(entt::registry &registry, entt::entity ground, entt::entity other)
+inline void
+handleGroundCollision(Position &aPos, const CollisionBox &aCbox, Position &bPos, const CollisionBox &bCbox,
+	GroundCollisionFlags *bGColFlags)
 {
-	auto[apos, acbox] = registry.get<Position, CollisionBox>(ground);
-	auto[bpos, bcbox] = registry.get<Position, CollisionBox>(other);
-	auto bGColFlags = registry.try_get<GroundCollisionFlags>(other);
-
-	auto aAabb = boxForEntity(apos, acbox);
-	auto bAabb = boxForEntity(bpos, bcbox);
+	auto aAabb = boxForEntity(aPos, aCbox);
+	auto bAabb = boxForEntity(bPos, bCbox);
 
 	coord_t overlapX = 0, overlapY = 0;
 	calculateOverlap(aAabb, bAabb, overlapX, overlapY);
 
 	if (abs(overlapX) < abs(overlapY))
 	{
-		bpos.x += overlapX;
+		bPos.x += overlapX;
 		if (overlapX != 0 && bGColFlags != nullptr)
 		{
 			if (overlapX < 0)
@@ -34,7 +32,7 @@ inline void handleGroundCollision(entt::registry &registry, entt::entity ground,
 	}
 	else
 	{
-		bpos.y += overlapY;
+		bPos.y += overlapY;
 		if (overlapY != 0 && bGColFlags != nullptr)
 		{
 			if (overlapY < 0)
@@ -51,7 +49,7 @@ inline void handleGroundCollision(entt::registry &registry, entt::entity ground,
 
 inline void collisionUpdate(entt::registry &registry)
 {
-	auto ents = registry.view<Position, CollisionBox>();
+	auto ents = registry.view<Position, const CollisionBox>();
 	auto entsEnd = ents.end();
 	for (auto it = ents.begin(); it != entsEnd; it++)
 	{
@@ -64,14 +62,18 @@ inline void collisionUpdate(entt::registry &registry)
 
 			auto aIsGround = registry.has<Ground>(a);
 			auto bIsGround = registry.has<Ground>(b);
+			auto[aPos, aCbox] = ents.get<Position, const CollisionBox>(a);
+			auto[bPos, bCbox] = ents.get<Position, const CollisionBox>(b);
 
 			if (aIsGround && !bIsGround)
 			{
-				handleGroundCollision(registry, a, b);
+				auto bColFlags = registry.try_get<GroundCollisionFlags>(b);
+				handleGroundCollision(aPos, aCbox, bPos, bCbox, bColFlags);
 			}
 			else if (!aIsGround && bIsGround)
 			{
-				handleGroundCollision(registry, b, a);
+				auto aColFlags = registry.try_get<GroundCollisionFlags>(a);
+				handleGroundCollision(bPos, bCbox, aPos, aCbox, aColFlags);
 			}
 		}
 	}

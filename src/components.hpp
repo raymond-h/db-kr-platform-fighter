@@ -93,7 +93,7 @@ struct Ground
 {
 };
 
-inline AABB boxForEntity(Position &pos, CollisionBox &cbox)
+inline AABB boxForEntity(const Position &pos, const CollisionBox &cbox)
 {
 	return {
 		pos.x - cbox.width / 2, pos.y - cbox.height / 2,
