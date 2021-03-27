@@ -1,3 +1,5 @@
+#include <optional>
+
 #include "input_update.hpp"
 
 void assignFighterInputs(const InputData &inputData, FighterInput &fi)
@@ -139,9 +141,30 @@ FighterStateEnum computeNextStateEarlyCancel(
 	}
 }
 
-std::variant<WindowChange, FighterStateEnum> computeNextWindow(
-	const FighterState &fs,
-	const FighterInput &fighterInput)
+std::optional<Data::MoveType> fighterStateToMoveType(FighterStateEnum state)
+{
+	switch (state)
+	{
+	case FighterStateEnum::Jab:
+		return Data::MoveType::Jab;
+	case FighterStateEnum::DashAttack:
+		return Data::MoveType::DashAttack;
+	case FighterStateEnum::ForwardTilt:
+		return Data::MoveType::ForwardTilt;
+	case FighterStateEnum::ForwardSmash:
+		return Data::MoveType::ForwardSmash;
+	case FighterStateEnum::UpSmash:
+		return Data::MoveType::UpSmash;
+	case FighterStateEnum::DownSmash:
+		return Data::MoveType::DownSmash;
+
+	default:
+		return {};
+	}
+}
+
+std::variant<WindowChange, FighterStateEnum>
+computeNextWindow(const FighterState &fs, const FighterInput &fighterInput, const FighterData &data)
 {
 	if (!isAttacking(fs.fighterState))
 	{
@@ -151,88 +174,36 @@ std::variant<WindowChange, FighterStateEnum> computeNextWindow(
 	const auto &state = fs.fighterState;
 	const auto &window = fs.window;
 
-	if (state == FighterStateEnum::Jab)
+	if (auto moveType = fighterStateToMoveType(state))
 	{
-		if (window == 0 && fs.currentWindowFrameCounter >= 3)
+		const Data::Character &characterData = data.character;
+		const Data::Move &moveData = characterData.moves.at(*moveType);
+		const Data::Window &currentWindowData = moveData.windows[window];
+
+		if (fs.currentWindowFrameCounter >= currentWindowData.getLength())
 		{
-			return WindowChange{1};
-		}
-		else if (window == 1 && fs.currentWindowFrameCounter >= 4)
-		{
-			return WindowChange{2};
-		}
-		else if (window == 2 && fs.currentWindowFrameCounter >= 3)
-		{
-			return FighterStateEnum::Idle;
-		}
-	}
-	else if (state == FighterStateEnum::ForwardTilt)
-	{
-		if (window == 0 && fs.currentWindowFrameCounter >= 10)
-		{
-			return WindowChange{1};
-		}
-		else if (window == 1 && fs.currentWindowFrameCounter >= 5)
-		{
-			return WindowChange{2};
-		}
-		else if (window == 2 && fs.currentWindowFrameCounter >= 10)
-		{
-			return FighterStateEnum::Idle;
-		}
-	}
-	else if (state == FighterStateEnum::DashAttack && fs.currentStateFrameCounter >= 50)
-	{
-		if (window == 0 && fs.currentWindowFrameCounter >= 15)
-		{
-			return WindowChange{1};
-		}
-		else if (window == 1 && fs.currentWindowFrameCounter >= 35)
-		{
-			return FighterStateEnum::Idle;
-		}
-	}
-		// forwardsmash
-	else if (state == FighterStateEnum::ForwardSmash)
-	{
-		if (window == 0 && (!fighterInput.doNormalAttack || fs.currentWindowFrameCounter >= 150))
-		{
-			return WindowChange{1};
-		}
-		else if (window == 1 && fs.currentWindowFrameCounter >= 40)
-		{
-			return FighterStateEnum::Idle;
-		}
-	}
-		// upsmash
-	else if (state == FighterStateEnum::UpSmash)
-	{
-		if (window == 0 && (!fighterInput.doNormalAttack || fs.currentWindowFrameCounter >= 150))
-		{
-			return WindowChange{1};
-		}
-		else if (window == 1 && fs.currentWindowFrameCounter >= 40)
-		{
-			return FighterStateEnum::Idle;
-		}
-	}
-		// downsmash
-	else if (state == FighterStateEnum::DownSmash)
-	{
-		if (window == 0 && (!fighterInput.doNormalAttack || fs.currentWindowFrameCounter >= 150))
-		{
-			return WindowChange{1};
-		}
-		else if (window == 1 && fs.currentWindowFrameCounter >= 40)
-		{
-			return FighterStateEnum::Idle;
+			if (window + 1 >= moveData.windows.size())
+			{
+				// TODO Specify this as part of move data? To allow special fall from certain moves
+				return FighterStateEnum::Idle;
+			}
+			else if (currentWindowData.getLoopType() == Data::WindowLoopType::LoopUntilButtonLetGo &&
+				fighterInput.doNormalAttack && fs.currentWindowFrameCounter < 150)
+			{
+				return WindowChange{window};
+			}
+			else
+			{
+				return WindowChange{window + 1};
+			}
 		}
 	}
 
 	return WindowChange{window};
 }
 
-void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel, facing_t &facing)
+void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel, facing_t &facing,
+	const FighterData &data)
 {
 	const auto isHoldingXDir = fighterInput.isHoldingXDirection();
 	const auto moveX = !isHoldingXDir ? 0 : Fixed(fighterInput.moveX) / 32768;
@@ -246,9 +217,15 @@ void updateChara(const FighterState &fs, const FighterInput &fighterInput, Veloc
 		facing = moveX.sign().int_value();
 		vel.x = fs.fighterState == FighterStateEnum::Dashing ? (moveX * 5) / 2 : (moveX * 5) / 4;
 	}
-	else if (fs.fighterState == FighterStateEnum::DashAttack)
+	else if (auto moveType = fighterStateToMoveType(fs.fighterState))
 	{
-		vel.x = Fixed(8) / 2 * fs.facing;
+		const auto &window = fs.window;
+		const auto &characterData = data.character;
+		const auto &moveData = characterData.get().moves.at(*moveType);
+		const auto &currentWindowData = moveData.windows[window];
+
+		vel.x = currentWindowData.getMoveX() * fs.facing;
+		vel.y = currentWindowData.getMoveY();
 	}
 	else if (isAirborne(fs.fighterState))
 	{

@@ -3,11 +3,14 @@
 
 #include "components.hpp"
 
-inline auto createPlayer(entt::registry &registry, int16_t playerIndex, coord_t x, coord_t y, coord_t w, coord_t h)
+inline auto
+createPlayer(entt::registry &registry, int16_t playerIndex, std::reference_wrapper<const Data::Character> character, coord_t x, coord_t y, coord_t w,
+	coord_t h)
 {
 	auto playerEntity = registry.create();
 	registry.emplace<PlayerControllable>(playerEntity, playerIndex);
 	registry.emplace<FighterState>(playerEntity, FACING_RIGHT, FighterStateEnum::Idle, 0, 0, 0);
+	registry.emplace<FighterData>(playerEntity, character);
 	registry.emplace<FighterInput>(playerEntity, (int16_t)0, (int16_t)0, false, false, false);
 	registry.emplace<Position>(playerEntity, x, y);
 	registry.emplace<CollisionBox>(playerEntity, w, h);

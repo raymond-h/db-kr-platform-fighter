@@ -38,11 +38,11 @@ struct WindowChange
 	window_t nextWindow;
 };
 
-std::variant<WindowChange, FighterStateEnum> computeNextWindow(
-	const FighterState &fs,
-	const FighterInput &fighterInput);
+std::variant<WindowChange, FighterStateEnum>
+computeNextWindow(const FighterState &fs, const FighterInput &fighterInput, const FighterData &data);
 
-void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel, facing_t &facing);
+void updateChara(const FighterState &fs, const FighterInput &fighterInput, Velocity &vel, facing_t &facing,
+	const FighterData &data);
 
 inline void setCurrentState(FighterState &fs, const FighterStateEnum nextState)
 {
@@ -66,8 +66,9 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 		}
 	);
 
-	registry.view<FighterState, const FighterInput, Velocity, const GroundCollisionFlags>().each(
-		[](auto &fs, auto &fi, auto &vel, auto &gColFlags)
+	registry.view<FighterState, const FighterInput, Velocity, const GroundCollisionFlags, const FighterData>().each(
+		[](FighterState &fs, const FighterInput &fi, Velocity &vel, const GroundCollisionFlags &gColFlags,
+			const FighterData &fighterData)
 		{
 			const auto nextState = computeNextState(fs, fi, vel, gColFlags);
 
@@ -79,7 +80,7 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 			{
 				fs.currentStateFrameCounter++;
 
-				const auto nextWindowOrState = computeNextWindow(fs, fi);
+				const auto nextWindowOrState = computeNextWindow(fs, fi, fighterData);
 
 				if (std::holds_alternative<WindowChange>(nextWindowOrState))
 				{
@@ -107,7 +108,7 @@ inline void inputUpdate(const CompleteInputData &completeInputData, entt::regist
 
 			// update vel from state
 			auto facing = fs.facing;
-			updateChara(fs, fi, vel, facing);
+			updateChara(fs, fi, vel, facing, fighterData);
 			fs.facing = facing;
 		}
 	);

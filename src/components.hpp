@@ -1,12 +1,14 @@
 #ifndef __COMPONENTS_HPP__
 #define __COMPONENTS_HPP__
 
+#include <functional>
 #include <entt/entt.hpp>
 
 #include "aabb.hpp"
 #include "approx_math.hpp"
 #include "fighter_state.hpp"
 #include "fixed.hpp"
+#include "data/interface.h"
 
 typedef Fixed coord_t;
 typedef int32_t window_t;
@@ -29,6 +31,11 @@ struct FighterState
 
 	window_t window;
 	int64_t currentWindowFrameCounter;
+};
+
+struct FighterData
+{
+	std::reference_wrapper<const Data::Character> character;
 };
 
 const int16_t DEADZONE = 3300;
@@ -97,7 +104,8 @@ inline AABB boxForEntity(const Position &pos, const CollisionBox &cbox)
 {
 	return {
 		pos.x - cbox.width / 2, pos.y - cbox.height / 2,
-		pos.x + cbox.width / 2, pos.y + cbox.height / 2};
+		pos.x + cbox.width / 2, pos.y + cbox.height / 2
+	};
 }
 
 #endif// __COMPONENTS_HPP__

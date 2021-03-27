@@ -11,6 +11,7 @@
 #include "components.hpp"
 #include "fixed.hpp"
 #include "prefabs.hpp"
+#include "data/characters.h"
 
 #include "systems/systems.hpp"
 
@@ -165,6 +166,8 @@ int main_game(int argc, char *argv[])
 		}
 	}
 
+	auto characterData = Data::getCharacterData();
+
 	CompleteInputData completeInputData{
 		{0, 0, false, false, 0, 0}};
 
@@ -172,7 +175,7 @@ int main_game(int argc, char *argv[])
 	createGround(registry, 520, 300, 60, 150);
 	createGround(registry, 320, 240 + 120, 400, 60);
 
-	createPlayer(registry, 0, 320, 240, 16, 16);
+	createPlayer(registry, 0, std::cref(characterData.at(Data::CharacterId::Experiment)), 320, 240, 16, 16);
 
 	const int frameLength = 1000 / 60;
 
